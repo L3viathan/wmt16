@@ -72,16 +72,12 @@ class BigramBuilder(object):
             return
         old_domain = ''
         sites = None
-        domain_processed = 0
         for pair in text_file_line_iter(self.train_file):
             en_url, fr_url = pair.split('\t')
             en_url = en_url.strip()
             fr_url = fr_url.strip()
             domain = get_domain(en_url)
             if old_domain !=domain:
-                domain_processed +=1
-                if domain_processed>=3:
-                    break
                 old_domain = domain
                 print '---Working in domain: ', domain
                 source_corpus= None
