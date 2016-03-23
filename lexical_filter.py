@@ -4,10 +4,12 @@
 import os, sys, glob, base64, gzip, re
 from collections import namedtuple
 import fileinput
+from config import config
+
 LENGTH_UPPER_BOUND = 1.3
 LENGTH_LOWER_BOUND = 0.7
 COMMON_WORDS_BOUND = 0.02
-CORPUS_PATH = "/tmp/u/vutrongh/strict/lett.train"
+CORPUS_PATH = config["corpus_path"]  # "/tmp/u/vutrongh/strict/lett.train"
 
 Page = namedtuple(
     "Page", "url, text, lang, length, token_set")
