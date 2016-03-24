@@ -134,7 +134,6 @@ class BigramBuilder(object):
         return new_bigram, count#couldn't get enough topn
 
 #================================For testing========================
-
 config= None
 
 def get_config():
