@@ -20,6 +20,8 @@ class BigramBuilder(object):
         self.target_lang = 'fr'
         self.en_bigram = {}
         self.fr_bigram = {}
+        
+        self.count_bigram_from_train()
 
     def _save_to_file(self):
         bigram = {'source': self.en_bigram, 'target': self.fr_bigram, 'desc': 'source: English, target: French'}
@@ -136,7 +138,7 @@ def get_config():
 
 def test1():
     bigram = BigramBuilder(config)
-    bigram.count_bigram_from_train()
+    #bigram.count_bigram_from_train()
     #bigram.export_to_csv('en_bigram.tsv', 'en')
     #bigram.export_to_csv('fr_bigram.tsv', 'fr')
     occur_above = 10

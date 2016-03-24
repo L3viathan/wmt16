@@ -1,2 +1,2 @@
-def default_word_standardizer(self, word):
+def default_word_standardizer(word):
     return word.lower()

@@ -46,3 +46,7 @@ def read_lett(f, source_language, target_language):
         else:  # ignore all other languages
             pass
     return source_corpus, target_corpus
+
+
+def get_extra_features(en_page, fr_page):
+    return []
