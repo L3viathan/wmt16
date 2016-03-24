@@ -1,7 +1,7 @@
-import autopath
 import os
 import codecs 
 
+import autopath
 from ml_app.utils.io_funs import text_file_line_iter, object_to_file, file_to_object, is_file
 from ml_app.utils.app_funs import get_domain, read_lett 
 
@@ -13,20 +13,13 @@ class BigramBuilder(object):
         self.data_path = self.full_config['general']['data_path']
         self.train_file = self.full_config['general']['train_file']
         self.en_word_standardizer = self.config['en_word_standardizer']
-        if self.en_word_standardizer is None:
-            self.en_word_standardizer = self._default_word_standardizer
         self.fr_word_standardizer = self.config['fr_word_standardizer']
-        if self.fr_word_standardizer is None:
-            self.fr_word_standardizer = self._default_word_standardizer
         self.result_file = self.config['result_file']
 
         self.source_lang = 'en'
         self.target_lang = 'fr'
         self.en_bigram = {}
         self.fr_bigram = {}
-
-    def _default_word_standardizer(self, word):
-        return word.lower()
 
     def _save_to_file(self):
         bigram = {'source': self.en_bigram, 'target': self.fr_bigram, 'desc': 'source: English, target: French'}

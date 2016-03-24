@@ -1,4 +1,5 @@
-from ml_app.utils.io_funs import as_project_path
+from ml_app.utils.io_funs import as_project_path, get_extra_features
+from ml_app.utils.nlp_funs import default_word_standardizer
 
 config = {
     'general':{
@@ -11,9 +12,16 @@ config = {
     'ngram_builder':{
         'BigramBuilder':{
             'debug': True,
-            'en_word_standardizer': None,#lemma extractor
-            'fr_word_standardizer': None, 
+            'en_word_standardizer': default_word_standardizer,#lemma extractor
+            'fr_word_standardizer': default_word_standardizer, 
             'result_file': as_project_path('data/en_fr_bigram.pkl'), 
+        },
+    },
+    'feature_builder':{
+        'BigramCounter':{
+            'en_word_standardizer': default_word_standardizer,#lemma extractor
+            'fr_word_standardizer': default_word_standardizer, 
+            'add_extra_feature': get_extra_features, 
         },
     },
     'logger':{
