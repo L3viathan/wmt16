@@ -1,0 +1,3 @@
+- fake data - adding negative pair to train/valid/test set
+- building ffnn model
+- based on the model build a classifier
