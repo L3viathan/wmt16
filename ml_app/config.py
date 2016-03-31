@@ -49,6 +49,13 @@ config = {
             ],
         },
     },
+    'data_manager':{
+         'FullDataManager':{
+            'train_file': as_project_path('data/train_enriched10.txt'),
+            'valid_file': as_project_path('data/valid_enriched10.txt'),
+            'test_file': as_project_path('data/test_enriched10.txt'),
+         },
+    },
     'classifier':{
         'model': NeuralNetwork,
     },
