@@ -3,6 +3,8 @@ import tensorflow as tf
 from ml_app.utils.io_funs import as_project_path
 from ml_app.utils.nlp_funs import default_word_standardizer
 from ml_app.utils.app_funs import get_extra_features
+from ml_app.ngram_builder.bigram_builder import BigramBuilder
+from ml_app.feature_builder.bigram_counter import BigramCounter
 from ml_app.models.nn import NeuralNetwork
 
 config = {
@@ -22,10 +24,12 @@ config = {
     },
     'feature_builder':{
         'BigramCounter':{
+            'bigram_builder': BigramBuilder, 
             'en_word_standardizer': default_word_standardizer,#lemma extractor
             'fr_word_standardizer': default_word_standardizer, 
             'add_extra_features': get_extra_features,
             'cache_file': as_project_path('data/en_fr_features.pkl'), 
+            'bigram_filter_level': 10,#if change this number remember to delete the feature cache file
         },
     },
     'learning_model':{
@@ -49,8 +53,9 @@ config = {
             ],
         },
     },
-    'data_manager':{
-         'FullDataManager':{
+    'data_provider':{
+         'FullDataProvider':{
+            'feature_builder': BigramCounter, 
             'train_file': as_project_path('data/train_enriched10.txt'),
             'valid_file': as_project_path('data/valid_enriched10.txt'),
             'test_file': as_project_path('data/test_enriched10.txt'),

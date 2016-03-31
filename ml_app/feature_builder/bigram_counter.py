@@ -1,20 +1,23 @@
 import autopath
 from ml_app.utils.io_funs import text_file_line_iter, object_to_file, file_to_object, is_file
-from ml_app.ngram_builder.bigram_builder import BigramBuilder
+#from ml_app.ngram_builder.bigram_builder import BigramBuilder
 from ml_app.utils.app_funs import Page
 
 class BigramCounter(object):
     
-    def __init__(self, config, en_bigram, fr_bigram):
+    def __init__(self, config):
         self.full_config = config
         self.config = config['feature_builder']['BigramCounter']
         self.en_word_standardizer = self.config['en_word_standardizer']
         self.fr_word_standardizer = self.config['fr_word_standardizer']
         self._get_extra_features = self.config['add_extra_features']
         self.cache_file = self.config['cache_file']
+        self.bigram_filter_level = self.config['bigram_filter_level']
 
-        self.en_bigram = en_bigram
-        self.fr_bigram = fr_bigram
+        self.bigram_builder = self.config['bigram_builder'](self.full_config)
+        self.en_bigram, _ = self.bigram_builder.get_top_bigram('en', occur_above=self.bigram_filter_level)
+        self.fr_bigram, _ = self.bigram_builder.get_top_bigram('fr', occur_above=self.bigram_filter_level)
+
         self.en_bigram_to_index, self.en_vector_size = self._format_vector(self.en_bigram)
         self.fr_bigram_to_index, self.fr_vector_size = self._format_vector(self.fr_bigram)
 
@@ -25,6 +28,10 @@ class BigramCounter(object):
         self._read_from_file()
         self.cache_changed = False
 
+    @property
+    def feature_size(self):
+        return self.en_vector_size + self.fr_vector_size
+
     def _save_to_file(self):
         cache_features = {'source': self.en_cache_features, 'target': self.fr_cache_features, 'desc': 'page features, source: English, target: French'}
         print '---Writing features to file:', self.cache_file
@@ -32,7 +39,7 @@ class BigramCounter(object):
 
     def _read_from_file(self):
         if is_file(self.cache_file):
-            print '---Reading features from file:', self.cache_file
+            print '---WARNING: Reading features from cache file:', self.cache_file
             cache_features = file_to_object(self.cache_file)
             self.en_cache_features = cache_features['source']
             self.fr_cache_features = cache_features['target']
@@ -62,7 +69,7 @@ class BigramCounter(object):
 
     def _count_bigram(self, to_index, vector_size, word_standardizer, page, cache):
         if page.url in cache:
-            print '---Get features from cache for: ', page.url
+            #print '---Get features from cache for: ', page.url
             return cache[page.url]
         
         text = page.text
@@ -101,6 +108,8 @@ class BigramCounter(object):
         return ret_vec
 
 #================================For testing========================
+#from ml_app.ngram_builder.bigram_builder import BigramBuilder
+
 config= None
 
 def get_config():
@@ -109,6 +118,7 @@ def get_config():
     config = cf
 
 def test1():
+    #has chanbed code, it couldn't run now, how to chnage the construction call
     bigram_builder = BigramBuilder(config)
     occur_above = 5
     en_bigram, count= bigram_builder.get_top_bigram('en', top_n=occur_above)
