@@ -14,9 +14,9 @@ class Classifier(object):
         self.model = self.config['model'](self.full_config)
 
         #these parametes will go to config for xeveral component
-        self.learning_rate = 0.01
-        self.max_step = 2000
-        self.batch_size = 100
+        self.learning_rate = self.config['learning_rate']
+        self.max_step = self.config['max_step']
+        self.batch_size = self.config['batch_size']
 
     def fill_feed_dict(self, dataset, X_pl, Y_pl):
         X, Y = dataset.next_batch(self.batch_size)
@@ -94,9 +94,11 @@ def get_config():
 def test1():
     corpus = input_data.read_data_sets('/scratch/home/thanh/study/machine_learning/libraries/tensorflow/mnist/data')
     classifer = Classifier(config, corpus)
+    import pdb
+    pdb.set_trace()
     classifer.train() 
 
-def main(_):
+def main():
     get_config()
     test1()
 

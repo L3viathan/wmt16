@@ -50,8 +50,9 @@ def gz_text_file_line_iter(path, encoding='utf8'):
         yield line
     zf.close()
 
-def text_file_line_iter(path, encode='utf8'):
-    with codecs.open(path, 'r', encoding=encode) as f:
+def text_file_line_iter(path, encode='ascii'):
+    #with codecs.open(path, 'rt', encoding=encode) as f:
+    with open(path, 'rt') as f:
         for line in f:
             yield line 
 

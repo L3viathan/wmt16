@@ -1,4 +1,5 @@
 import random
+import codecs
 
 import autopath
 from ml_app.utils.io_funs import text_file_line_iter
@@ -21,13 +22,15 @@ def add_negative_examples(corpus_set, en_url, fr_url, fr_corpus, top_n=None):
         top_n = len(fr_urls)
     idxs = random.sample(range(len(fr_urls)), top_n)
     for idx in idxs:
+        #url = fr_urls[idx].decode('utf-8')#some url includes utf-8
         url = fr_urls[idx]
         if url != fr_url:
-            line = '%s\t%s\t0'%(en_url, fr_url)
+            line = '%s\t%s\t0'%(en_url, url)
             corpus_set.append(line)
             count +=1
             if top_n is not None and count>top_n:
                 break
+
     return count
 
 def enrich_data(corpus_file, out_file, top_n=100):
@@ -61,14 +64,23 @@ def enrich_data(corpus_file, out_file, top_n=100):
         positive_count += 1
         negative_count += nega_count
 
+    #'''
     with open(out_file, 'wt') as f:
         f.write('\n'.join(corpus_set))
+    '''
+    with codecs.open(out_file, 'wt', encoding='utf-8') as f:
+        f.write('\n'.join(corpus_set))
+    '''
 
 def main():
     get_config()
     corpus_file = 'train.txt'
-    negative_example = 5
+    corpus_file = 'valid.txt'
+    corpus_file = 'test.txt'
+    negative_example = 10
     out_file = 'train_enriched%d.txt'%negative_example
+    out_file = 'valid_enriched%d.txt'%negative_example
+    out_file = 'test_enriched%d.txt'%negative_example
     enrich_data(corpus_file, out_file, negative_example)
 
 if __name__ == '__main__':

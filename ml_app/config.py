@@ -63,6 +63,9 @@ config = {
     },
     'classifier':{
         'model': NeuralNetwork,
+        'learning_rate': 0.01,
+        'max_step': 2000,
+        'batch_size': 100,
     },
     'logger':{
     },

@@ -1,5 +1,3 @@
-import pdb
-
 import os
 import numpy as np
 import time
@@ -11,9 +9,33 @@ class DataSet(object):
     def __init__(self, X, Y):
         self.X = X
         self.Y = Y
+        self._num_examples = X.shape[0]
+        self._index_in_epoch = 0
+        self._epoch_completed = 0 
+
+        #TODO, should we scale feature to 0 and 1????
+
+    @property
+    def num_examples(self):
+        return self._num_examples
 
     def next_batch(self, batch_size):
-        pass
+        start = self._index_in_epoch
+        self._index_in_epoch += batch_size
+        if self._index_in_epoch > self._num_examples:
+            self._epochs_completed += 1
+
+            perm = np.arange(self.num_examples)
+            np.random.shuffle(perm)
+            self.X = self.X[perm]
+            self.Y = self.Y[perm]
+
+            start = 0
+            self._index_in_epoch = batch_size
+
+            assert batch_size <= self._num_examples
+        end = self._index_in_epoch
+        return self.X[start:end], self.Y[start:end]
 
 class FullDataProvider(object):
     '''Everything in memory.'''
@@ -29,15 +51,15 @@ class FullDataProvider(object):
         self.test_file = self.config['test_file']
 
         self.train = self.build_dataset(self.train_file)
-        self.valid = None
-        self.test = None
+        self.valid = self.build_dataset(self.valid_file)
+        self.test = self.build_dataset(self.test_file)
 
     def _read_dataset():#No, prefer to cache only feature of docudment in feature builder
         pass
 
     def build_dataset(self, corpus_file):
-        print '----------Build dataset:', corpus_file
         start_time = time.time()
+        print '----------Build dataset:', corpus_file
         lines = []
         with open(corpus_file, 'rt') as f:
             lines = f.readlines()
@@ -51,7 +73,12 @@ class FullDataProvider(object):
         train_dir_path = self.data_path#os.path.join(self.data_path, 'lett.train') 
         for idx, line in enumerate(lines):
             en_url, fr_url, label = line.split('\t')
-            #TODO next try to get feature from cache first then if not exist, then read the corpus and file
+
+            cache_features = self.fbuilder.get_cached_features(en_url, fr_url)
+            if cache_features is not None:
+                X[idx] = cache_features
+                Y[idx] = int(label)
+                continue
 
             domain = get_domain(en_url)
             if old_domain != domain:
@@ -66,10 +93,8 @@ class FullDataProvider(object):
 
         dataset = DataSet(X, Y)
 
-        print '----------Finish build dataset %s in %d sec'%(corpus_file, time.time - start_time)
+        print '----------Finish build dataset %s in %f sec'%(corpus_file, time.time() - start_time)
         return dataset
-
-                
 
 #================================For testing========================
 from ml_app.feature_builder.bigram_counter import BigramCounter
@@ -83,6 +108,7 @@ def get_config():
 
 def test1():
     dprovider = FullDataProvider(config)
+    import pdb
     pdb.set_trace()
 
 def main():
