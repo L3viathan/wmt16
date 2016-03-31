@@ -95,6 +95,10 @@ class BigramCounter(object):
         self.cache_changed = True
         return features
 
+    def check_in_cache(self, lang, url):
+        #TODO check the documment already able to get features from cace
+        pass
+
     def get_features(self, en_page, fr_page):
         en_vec = self._count_bigram(self.en_bigram_to_index, self.en_vector_size, self.en_word_standardizer, en_page, self.en_cache_features)
         fr_vec = self._count_bigram(self.fr_bigram_to_index, self.fr_vector_size, self.fr_word_standardizer, fr_page, self.fr_cache_features)

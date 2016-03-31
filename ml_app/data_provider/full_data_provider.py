@@ -2,6 +2,7 @@ import pdb
 
 import os
 import numpy as np
+import time
 
 import autopath
 from ml_app.utils.app_funs import get_domain, read_lett
@@ -35,7 +36,8 @@ class FullDataProvider(object):
         pass
 
     def build_dataset(self, corpus_file):
-        print 'Build dataset:', corpus_file
+        print '----------Build dataset:', corpus_file
+        start_time = time.time()
         lines = []
         with open(corpus_file, 'rt') as f:
             lines = f.readlines()
@@ -49,6 +51,8 @@ class FullDataProvider(object):
         train_dir_path = self.data_path#os.path.join(self.data_path, 'lett.train') 
         for idx, line in enumerate(lines):
             en_url, fr_url, label = line.split('\t')
+            #TODO next try to get feature from cache first then if not exist, then read the corpus and file
+
             domain = get_domain(en_url)
             if old_domain != domain:
                 print '---build feature for:', domain
@@ -62,6 +66,7 @@ class FullDataProvider(object):
 
         dataset = DataSet(X, Y)
 
+        print '----------Finish build dataset %s in %d sec'%(corpus_file, time.time - start_time)
         return dataset
 
                 
