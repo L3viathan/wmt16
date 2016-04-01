@@ -36,19 +36,19 @@ config = {
         'NeuralNetwork':{
             'layer_description':[
                 {   'name': 'input',
-                    'unit_size': 784,
+                    'unit_size': 72779,#784,#bigram occur over 10
                 },
                 {   'name': 'hidden1',
                     'active_fun': tf.nn.relu,
-                    'unit_size': 128,
+                    'unit_size': 16384,#128,
                 },
                 {   'name': 'hidden2',
                     'active_fun': tf.nn.relu,
-                    'unit_size': 32,
+                    'unit_size': 256,#32
                 },
                 {   'name': 'output',
                     'active_fun': None, 
-                    'unit_size': 10, 
+                    'unit_size': 2,#10 
                 },
             ],
         },
@@ -63,9 +63,11 @@ config = {
     },
     'classifier':{
         'model': NeuralNetwork,
-        'learning_rate': 0.01,
-        'max_step': 2000,
+        'learning_rate': 1e-5,#0.01,
+        'max_step': 100,#2000,
         'batch_size': 100,
+        'step_to_report_loss': 1,
+        'step_to_save_eval_model': 10,
     },
     'logger':{
     },

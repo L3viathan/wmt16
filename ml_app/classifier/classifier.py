@@ -17,6 +17,8 @@ class Classifier(object):
         self.learning_rate = self.config['learning_rate']
         self.max_step = self.config['max_step']
         self.batch_size = self.config['batch_size']
+        self.step_to_report_loss = self.config['step_to_report_loss']
+        self.step_to_save_eval_model = self.config['step_to_save_eval_model']
 
     def fill_feed_dict(self, dataset, X_pl, Y_pl):
         X, Y = dataset.next_batch(self.batch_size)
@@ -51,15 +53,15 @@ class Classifier(object):
                 _, loss_value = sess.run([train_op, loss_op], feed_dict=feed)
                 duration = time.time() - start_time
 
-                if step%100 == 0:
+                if step%self.step_to_report_loss == 0:
                     print 'Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, duration)
                     #summary_str = sess.run(summary_op, feed_dict=feed)
                     #summary_writer.add_summary(summary_str, step)
 
-                if (step+1)%1000 == 0 or (step+1)==self.max_step:
-                    saver.save(sess, './', global_step=step)
-                    print 'Evaluate train set:'
-                    self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.train)
+                if (step+1)%self.step_to_save_eval_model == 0 or (step+1)==self.max_step:
+                    #saver.save(sess, './', global_step=step)
+                    #print 'Evaluate train set:'
+                    #self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.train)
                     print 'Evaluate valid set:'
                     self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.validation)
                     print 'Evaluate test set:'
@@ -94,8 +96,6 @@ def get_config():
 def test1():
     corpus = input_data.read_data_sets('/scratch/home/thanh/study/machine_learning/libraries/tensorflow/mnist/data')
     classifer = Classifier(config, corpus)
-    import pdb
-    pdb.set_trace()
     classifer.train() 
 
 def main():

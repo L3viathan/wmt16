@@ -11,7 +11,7 @@ class DataSet(object):
         self.Y = Y
         self._num_examples = X.shape[0]
         self._index_in_epoch = 0
-        self._epoch_completed = 0 
+        self._epochs_completed = 0 
 
         #TODO, should we scale feature to 0 and 1????
 
@@ -51,7 +51,7 @@ class FullDataProvider(object):
         self.test_file = self.config['test_file']
 
         self.train = self.build_dataset(self.train_file)
-        self.valid = self.build_dataset(self.valid_file)
+        self.validation = self.build_dataset(self.valid_file)
         self.test = self.build_dataset(self.test_file)
 
     def _read_dataset():#No, prefer to cache only feature of docudment in feature builder
@@ -67,7 +67,7 @@ class FullDataProvider(object):
         num = len(lines)
         vector_size = self.fbuilder.feature_size
         X = np.zeros(shape=(num, vector_size))
-        Y = np.zeros(shape=(num, 1))
+        Y = np.zeros(shape=(num,))
 
         old_domain = ''
         train_dir_path = self.data_path#os.path.join(self.data_path, 'lett.train') 

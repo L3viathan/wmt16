@@ -14,7 +14,7 @@ def test1():
     classifer = Classifier(config, corpus)
     classifer.train()
 
-def main(_):
+def main():
     get_config()
     test1()
 
