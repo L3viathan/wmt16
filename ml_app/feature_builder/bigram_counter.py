@@ -36,6 +36,11 @@ class BigramCounter(object):
         cache_features = {'source': self.en_cache_features, 'target': self.fr_cache_features, 'desc': 'page features, source: English, target: French'}
         print '---Writing features to file:', self.cache_file
         object_to_file(cache_features, self.cache_file)
+        self.cache_changed = False
+
+    def save_features(self):
+        if self.cache_changed:
+            self._save_to_file()
 
     def _read_from_file(self):
         if is_file(self.cache_file):
@@ -47,13 +52,11 @@ class BigramCounter(object):
         return False
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.cache_changed:
-            self._save_to_file()
+        self.save_features()
         #super(BigramCounter, self).__exit__(exc_type, exc_value, tracback)
     
     def __del__(self):
-        if self.cache_changed:
-            self._save_to_file()
+        self.save_features()
         #super(BigramCounter, self).__del__()
 
     def _format_vector(self, bigram):

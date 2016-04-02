@@ -6,6 +6,7 @@ from ml_app.utils.app_funs import get_extra_features
 from ml_app.ngram_builder.bigram_builder import BigramBuilder
 from ml_app.feature_builder.bigram_counter import BigramCounter
 from ml_app.models.nn import NeuralNetwork
+from ml_app.data_provider.full_data_provider import FullDataProvider
 
 config = {
     'general':{
@@ -29,11 +30,22 @@ config = {
             'fr_word_standardizer': default_word_standardizer, 
             'add_extra_features': get_extra_features,
             'cache_file': as_project_path('data/en_fr_features.pkl'), 
-            'bigram_filter_level': 10,#if change this number remember to delete the feature cache file
+            'bigram_filter_level': 20,#10#if change this number remember to delete the feature cache file
         },
     },
     'learning_model':{
         'NeuralNetwork':{
+            'layer_description':[
+                {   'name': 'input',
+                    'unit_size': 31986,#784,#bigram occur over 20
+                },
+                {   'name': 'output',
+                    'active_fun': None,
+                    'unit_size': 2,#10
+                },
+            ],
+        },        
+        'NeuralNetwork4':{
             'layer_description':[
                 {   'name': 'input',
                     'unit_size': 72779,#784,#bigram occur over 10
@@ -62,12 +74,14 @@ config = {
          },
     },
     'classifier':{
+        #NOTE: total train example: 10589
         'model': NeuralNetwork,
-        'learning_rate': 1e-5,#0.01,
-        'max_step': 100,#2000,
-        'batch_size': 100,
+        'data_provider': FullDataProvider,
+        'learning_rate': 0.01,#0.001, 1e-5,#0.01,
+        'max_step': 400,#2000,#6 epochs
+        'batch_size': 350,
         'step_to_report_loss': 1,
-        'step_to_save_eval_model': 10,
+        'step_to_save_eval_model': 60,
     },
     'logger':{
     },

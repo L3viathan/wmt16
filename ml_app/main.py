@@ -10,8 +10,7 @@ def get_config():
     config = cf
 
 def test1():
-    corpus = FullDataProvider(config)
-    classifer = Classifier(config, corpus)
+    classifer = Classifier(config)
     classifer.train()
 
 def main():

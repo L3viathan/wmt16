@@ -13,7 +13,7 @@ class DataSet(object):
         self._index_in_epoch = 0
         self._epochs_completed = 0 
 
-        #TODO, should we scale feature to 0 and 1????
+        #TODO, should we scale feature to 0 and 1????, not this app
 
     @property
     def num_examples(self):
@@ -37,6 +37,31 @@ class DataSet(object):
         end = self._index_in_epoch
         return self.X[start:end], self.Y[start:end]
 
+    def next_balanced_batch(self, batch_size):
+        #NOTE: batch size no larger than double the number of possitive/negative examples and also only for binary classification
+        batch_x, batch_y = self.next_batch(batch_size)
+        negative_idxs = np.where(batch_y==0)[0]
+        add_positive_num = len(negative_idxs)-batch_size/2
+
+        reduce_idxs = negative_idxs
+        reduce_num = add_positive_num
+        reduce_label = 0
+        if add_positive_num<0:
+            reduce_idxs = np.where(batch_y==1)[0]
+            reduce_num = abs(add_positive_num)
+            reduce_label = 1
+
+        add_label = abs(1-reduce_label)
+        reduce_idxs = np.random.choice(reduce_idxs, reduce_num, replace=False)
+        add_idxs = np.where(self.Y==add_label)[0]
+        add_idxs = np.random.choice(add_idxs, reduce_num, replace=False)
+
+        batch_x[reduce_idxs] = self.X[add_idxs]
+        batch_y[reduce_idxs] = add_label
+
+        return batch_x, batch_y
+        
+
 class FullDataProvider(object):
     '''Everything in memory.'''
 
@@ -44,6 +69,8 @@ class FullDataProvider(object):
         self.full_config = config
         self.config = config['data_provider']['FullDataProvider']
         self.fbuilder = self.config['feature_builder'](self.full_config)
+
+        #TODO: fake data for fast process of checking everythin fit in together
     
         self.data_path = self.full_config['general']['data_path']
         self.train_file = self.config['train_file']
@@ -53,9 +80,7 @@ class FullDataProvider(object):
         self.train = self.build_dataset(self.train_file)
         self.validation = self.build_dataset(self.valid_file)
         self.test = self.build_dataset(self.test_file)
-
-    def _read_dataset():#No, prefer to cache only feature of docudment in feature builder
-        pass
+        self.fbuilder.save_features()
 
     def build_dataset(self, corpus_file):
         start_time = time.time()
@@ -108,8 +133,7 @@ def get_config():
 
 def test1():
     dprovider = FullDataProvider(config)
-    import pdb
-    pdb.set_trace()
+    x, y = dprovider.test.next_balanced_batch(350)
 
 def main():
     get_config()

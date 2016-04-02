@@ -75,12 +75,12 @@ def enrich_data(corpus_file, out_file, top_n=100):
 def main():
     get_config()
     corpus_file = 'train.txt'
-    corpus_file = 'valid.txt'
-    corpus_file = 'test.txt'
-    negative_example = 10
+    #corpus_file = 'valid.txt'
+    #corpus_file = 'test.txt'
+    negative_example = 5
     out_file = 'train_enriched%d.txt'%negative_example
-    out_file = 'valid_enriched%d.txt'%negative_example
-    out_file = 'test_enriched%d.txt'%negative_example
+    #out_file = 'valid_enriched%d.txt'%negative_example
+    #out_file = 'test_enriched%d.txt'%negative_example
     enrich_data(corpus_file, out_file, negative_example)
 
 if __name__ == '__main__':

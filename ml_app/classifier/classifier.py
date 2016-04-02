@@ -7,11 +7,11 @@ import tensorflow as tf
 
 class Classifier(object):
     
-    def __init__(self, config, datasets):
+    def __init__(self, config):
         self.full_config = config
         self.config = config['classifier']
-        self.corpus = datasets
         self.model = self.config['model'](self.full_config)
+        self.corpus = self.config['data_provider'](self.full_config)
 
         #these parametes will go to config for xeveral component
         self.learning_rate = self.config['learning_rate']
@@ -20,8 +20,11 @@ class Classifier(object):
         self.step_to_report_loss = self.config['step_to_report_loss']
         self.step_to_save_eval_model = self.config['step_to_save_eval_model']
 
-    def fill_feed_dict(self, dataset, X_pl, Y_pl):
-        X, Y = dataset.next_batch(self.batch_size)
+    def fill_feed_dict(self, dataset, X_pl, Y_pl, balanced=False):
+        if balanced:
+            X, Y = dataset.next_balanced_batch(self.batch_size)
+        else:
+            X, Y = dataset.next_batch(self.batch_size)
         return {X_pl: X, Y_pl: Y}
 
     def train(self):
@@ -48,7 +51,7 @@ class Classifier(object):
 
             for step in xrange(self.max_step):
                 start_time = time.time()
-                feed = self.fill_feed_dict(self.corpus.train, X_placeholder, Y_placeholder)
+                feed = self.fill_feed_dict(self.corpus.train, X_placeholder, Y_placeholder, balanced=True)
                 
                 _, loss_value = sess.run([train_op, loss_op], feed_dict=feed)
                 duration = time.time() - start_time
@@ -60,8 +63,8 @@ class Classifier(object):
 
                 if (step+1)%self.step_to_save_eval_model == 0 or (step+1)==self.max_step:
                     #saver.save(sess, './', global_step=step)
-                    #print 'Evaluate train set:'
-                    #self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.train)
+                    print 'Evaluate train set:'
+                    self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.train)
                     print 'Evaluate valid set:'
                     self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.validation)
                     print 'Evaluate test set:'

@@ -1,3 +1,2 @@
-- fake data - adding negative pair to train/valid/test set
-- building ffnn model
-- based on the model build a classifier
+- Run different setting and find the one best??
+- Have time, add function fake data to data_provider, since get reall data often take long time, while we need check many thing work with correct shape of the inpub
