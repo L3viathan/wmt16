@@ -3,7 +3,7 @@ Summary (first try with only pure linguistic features)
 It got over .92 accuracy in the classification task. The accuracy is quite fair since it was not trained to always predict the dominant class in data (two urls are not transaltion pairs of each other)
 
 ==========  =====   =====   =====
-Set            top1    top5    top10
+Set         top1    top5    top10
 ==========  =====   =====   =====
 train       .070   .194     .188
 validation  .045   .185     .139
@@ -16,16 +16,16 @@ I could believe on, after I have better linguistic features and enrich them with
 
 Impressivie results
 ------
-1.*****------http://eu.blizzard.com/en-gb/community/blizzcast/archive/episode12.html
-*--rs:in TOP5
-*--candidate_num:6640
-*--gold(1):http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html
-*---top 10 cans: found only 3 potential
-*http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode6.html
-*http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html
-*http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode3.html
+*****------http://eu.blizzard.com/en-gb/community/blizzcast/archive/episode12.html
+|--rs:in TOP5
+|--candidate_num:6640
+|--gold(1):http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html
+|---top 10 cans: found only 3 potential
+|http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode6.html
+|http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html
+|http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode3.html
 
-2.*****------http://cineuropa.mobi/interview.aspx?lang=en&documentID=109685
+*****------http://cineuropa.mobi/interview.aspx?lang=en&documentID=109685
 --rs:CORRECT
 --can_num:15972
 --gold(0):http://cineuropa.mobi/interview.aspx?lang=fr&documentID=109685
