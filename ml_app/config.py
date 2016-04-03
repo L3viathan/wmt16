@@ -34,10 +34,17 @@ config = {
         },
     },
     'learning_model':{
+        #NOTE:
+        #bigram over 20: 31986       ; over 10: 72779; over 30:
+        #peform over 20: .93:.89:.88 ; over 10:      ; over 30:
         'NeuralNetwork':{
             'layer_description':[
                 {   'name': 'input',
                     'unit_size': 31986,#784,#bigram occur over 20
+                },
+                {   'name': 'hidden1',
+                    'active_fun': tf.nn.relu,
+                    'unit_size': 2048,#128,
                 },
                 {   'name': 'output',
                     'active_fun': None,
@@ -77,11 +84,13 @@ config = {
         #NOTE: total train example: 10589
         'model': NeuralNetwork,
         'data_provider': FullDataProvider,
-        'learning_rate': 0.01,#0.001, 1e-5,#0.01,
-        'max_step': 400,#2000,#6 epochs
+        'learning_rate': 0.0001, #best:0.0001, #0.01,#ok at frst:0.001, 1e-5,#0.01,
+        'max_step': 1000,#400,#2000,#400->6 epochs
         'batch_size': 350,
-        'step_to_report_loss': 1,
-        'step_to_save_eval_model': 60,
+        'step_to_report_loss': 50,
+        'step_to_save_eval_model': 100,#100, #200,
+        'model_storage_file': as_project_path('data/thanh/models/nn'),
+        'load_model_step': 699,
     },
     'logger':{
     },

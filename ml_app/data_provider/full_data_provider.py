@@ -73,6 +73,8 @@ class FullDataProvider(object):
         #TODO: fake data for fast process of checking everythin fit in together
     
         self.data_path = self.full_config['general']['data_path']
+        self.train_dir_path = self.data_path#os.path.join(self.data_path, 'lett.train') 
+        self._vector_size = self.fbuilder.feature_size
         self.train_file = self.config['train_file']
         self.valid_file = self.config['valid_file']
         self.test_file = self.config['test_file']
@@ -90,12 +92,10 @@ class FullDataProvider(object):
             lines = f.readlines()
 
         num = len(lines)
-        vector_size = self.fbuilder.feature_size
-        X = np.zeros(shape=(num, vector_size))
+        X = np.zeros(shape=(num, self._vector_size))
         Y = np.zeros(shape=(num,))
 
         old_domain = ''
-        train_dir_path = self.data_path#os.path.join(self.data_path, 'lett.train') 
         for idx, line in enumerate(lines):
             en_url, fr_url, label = line.split('\t')
 
@@ -108,7 +108,7 @@ class FullDataProvider(object):
             domain = get_domain(en_url)
             if old_domain != domain:
                 print '---build feature for:', domain
-                en_corpus, fr_corpus = read_lett(os.path.join(train_dir_path, domain + '.lett.gz'), 'en', 'fr')
+                en_corpus, fr_corpus = read_lett(os.path.join(self.train_dir_path, domain + '.lett.gz'), 'en', 'fr')
                 old_domain = domain
 
             en_page = en_corpus[en_url]
@@ -120,6 +120,24 @@ class FullDataProvider(object):
 
         print '----------Finish build dataset %s in %f sec'%(corpus_file, time.time() - start_time)
         return dataset
+
+    def get_one_url_corpus(self, en_url):
+        domain = get_domain(en_url)
+        en_corpus, fr_corpus = read_lett(os.path.join(self.train_dir_path, domain + '.lett.gz'), 'en', 'fr')
+        
+        num = len(fr_corpus.keys())
+        X = np.zeros(shape=(num, self._vector_size))
+        fr_urls = [] 
+        for idx, fr_url in enumerate(fr_corpus.keys()):
+            features = self.fbuilder.get_cached_features(en_url, fr_url)
+            if features is None:
+                en_page = en_corpus[en_url]
+                fr_page = fr_corpus[fr_url]
+                features = self.fbuilder.get_features(en_page, fr_page)
+            X[idx] = features 
+            fr_urls.append(fr_url)
+
+        return X, fr_urls
 
 #================================For testing========================
 from ml_app.feature_builder.bigram_counter import BigramCounter
@@ -133,7 +151,10 @@ def get_config():
 
 def test1():
     dprovider = FullDataProvider(config)
-    x, y = dprovider.test.next_balanced_batch(350)
+    #x, y = dprovider.test.next_balanced_batch(350)
+    x, urls = dprovider.get_one_url_corpus('http://bugadacargnel.com/en/pages/artistes.php?name=annikalarsson')
+    import pdb
+    pdb.set_trace()
 
 def main():
     get_config()

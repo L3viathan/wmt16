@@ -1,2 +1,8 @@
+-* add match url before running the Neural Net in evaluate stage
+- Run different setting and find the one best? Try to detect is the problem could be solvec by the model? OK, it is solable, still need to try more
+- check different activation function, different number of bigram filter, net structure
+- Classifier: Better switch between train and evaluate mode, don't load whole data when evaluate, since it would not be used
+- Change the evaluation, predict and get the the document wiht highest score
+- Change the loss funtion, somehow present directly the problem
 - Run different setting and find the one best??
 - Have time, add function fake data to data_provider, since get reall data often take long time, while we need check many thing work with correct shape of the inpub
