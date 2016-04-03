@@ -17,13 +17,13 @@ I could believe on, after I have better linguistic features and enrich them with
 Impressivie results
 ------
 *****------http://eu.blizzard.com/en-gb/community/blizzcast/archive/episode12.html
-|--rs:in TOP5
-|--candidate_num:6640
-|--gold(1):http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html
-|---top 10 cans: found only 3 potential
-|http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode6.html
-|http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html
-|http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode3.html
+| --rs:in TOP5  
+| --candidate_num:6640  
+| --gold(1):http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html  
+| ---top 10 cans: found only 3 potential  
+| http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode6.html  
+| http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode12.html  
+| http://eu.blizzard.com/fr-fr/community/blizzcast/archive/episode3.html  
 
 *****------http://cineuropa.mobi/interview.aspx?lang=en&documentID=109685
 --rs:CORRECT
