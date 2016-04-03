@@ -1,0 +1,1 @@
+- for NN-based or multip-layer model, remember to using dropout before the last softmax layer
