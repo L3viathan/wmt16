@@ -1,3 +1,6 @@
+- check while gold_idx at 0 but still count for TOP5
+- train network strucutre, and another linguistic feature before adding hueristic features. Find the best one first, then and heuristic features to improve.
+- Heuristic features: shared word in title, in url etc.? len?
 -* add match url before running the Neural Net in evaluate stage
 - Run different setting and find the one best? Try to detect is the problem could be solvec by the model? OK, it is solable, still need to try more
 - check different activation function, different number of bigram filter, net structure
