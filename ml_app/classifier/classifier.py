@@ -135,6 +135,7 @@ class Classifier(object):
                 top10_score += 1
             elif gold_idx in top10_idxs[0:5]:
                 top5_score += 1
+                top10_score += 1
                 debug_print = 'in TOP5'
             elif gold_idx in top10_idxs[0:10]:
                 top10_score += 1

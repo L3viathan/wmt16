@@ -1,3 +1,4 @@
+- !!Read lett file only one time during evaluton, build_one_url_corpus
 - check while gold_idx at 0 but still count for TOP5
 - train network strucutre, and another linguistic feature before adding hueristic features. Find the best one first, then and heuristic features to improve.
 - Heuristic features: shared word in title, in url etc.? len?
