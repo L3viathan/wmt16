@@ -1,6 +1,6 @@
 def filter(pairs):
     for pair in pairs:
-        yield pair # demo: yield only the first pair
+        yield pair # demo: yield all pairs
         #break
 
 def score(pairs):
