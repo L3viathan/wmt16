@@ -27,10 +27,11 @@ def get_pages(filename):
 
 def read_gold(filename):
     """Return pairs (english, french) of URLs that are gold pairs."""
-    gold = set()
+    gold = {}
     with open(filename) as f:
         for line in f:
-            gold.add(tuple(line.strip().split("\t")))
+            source, target = line.strip().split("\t")
+            gold[source] = target
     return gold
 
 def log(*args, **kwargs):
@@ -44,19 +45,31 @@ if __name__ == '__main__':
         pairs = itertools.combinations(get_pages(filename), 2)
 
     for fltr in filters:
-        log("Building {}".format(fltr))
-        # build pipeline
+        # set up filters
         pairs = fltr(pairs)
 
     for scorer in scorers:
-        log("Building {}".format(scorer))
-        # build pipeline
+        # set up scorers
         pairs = scorer(pairs)
 
+    pairs = list(pairs)
+
+    """
     for pair, score in pairs:
         left, right = pair
         print(left.url, right.url, score)
+    """
 
-    # call scorers
+    threshold = 0.5  # later: learned
+
     # evaluate
     gold = read_gold("data/train.pairs")
+    ours = {}
+
+    for pair, score in pairs:
+        left, right = pair
+        if score > threshold and left not in ours:
+            ours[left] = right
+
+    recall = sum(1 for key in gold if gold[key] == ours.get(key, None)) / len(gold)
+    print("Recall:", recall)
