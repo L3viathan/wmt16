@@ -70,7 +70,7 @@ def execute_pipeline(en_url):
     scores = np.ndarray()#alwasy score all score of each reaming target page
     
     for op in steps:#NOTE: Only this point is different which provide scores of previous steps to the current step, and don't disguinstic between filter/scorer/ranker
-        candidates, scores  = op(en_page, candidates, scores)#op could be filter or scorer, ranker, take look at simple for detail
+        candidates, scores  = op(en_page, candidates, scores)#op could be filter or scorer, ranker, take look at simple.py for detail
 
     return candidates, scores #best candidates and score alreay ranked (ordered) by the last ranker
         
