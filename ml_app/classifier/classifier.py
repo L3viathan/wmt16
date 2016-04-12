@@ -67,7 +67,7 @@ class Classifier(object):
                     #summary_writer.add_summary(summary_str, step)
 
                 if (step+1)%self.step_to_save_eval_model == 0 or (step+1)==self.max_step:
-                    saver.save(sess, self.model_storage_file, global_step=step)
+                    saver.save(sess, self.model_storage_file, global_step=(step+1))
                     print 'Evaluate train set:'
                     self.evaluate(sess, eval_op, X_placeholder, Y_placeholder, self.corpus.train)
                     print 'Evaluate valid set:'

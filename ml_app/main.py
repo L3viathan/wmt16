@@ -14,7 +14,9 @@ def test1():
     classifier = Classifier(config)
 
     #NOTE: manualy switch/change the lines following
-    #classifer.train()
+    #classifier.train()
+
+    #'''
     classifier.load_best_model()#The current version classifier requires manuaaly set the trraning step which you think it is the best
    
     sys.stderr.write('start eval valid\n')
@@ -34,6 +36,7 @@ def test1():
     top1, top5, top10 = classifier.evaluate_wmt16('./data/thanh/train.txt')
     print 'Evaluation train: top1: %.3f, top5: %.3f, top10: %.3f'%(top1, top5, top10)
     sys.stderr.write('Evaluation train: top1: %.3f, top5: %.3f, top10: %.3f\n'%(top1, top5, top10))
+    #'''
 
 def main():
     get_config()

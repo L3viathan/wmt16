@@ -84,6 +84,10 @@ class FullDataProvider(object):
         self.test = self.build_dataset(self.test_file)
         self.fbuilder.save_features()
 
+        self.current_evaluate_domain = ''
+        self.current_evaluate_en_corpus = None
+        self.current_evaluate_fr_corpus = None
+
     def build_dataset(self, corpus_file):
         start_time = time.time()
         print '----------Build dataset:', corpus_file
@@ -122,8 +126,15 @@ class FullDataProvider(object):
         return dataset
 
     def get_one_url_corpus(self, en_url):
+        #TODO: should change to cache only urls of a domain, instead of read lett.gz file again here
         domain = get_domain(en_url)
-        en_corpus, fr_corpus = read_lett(os.path.join(self.train_dir_path, domain + '.lett.gz'), 'en', 'fr')
+        if domain != self.current_evaluate_domain:
+            en_corpus, fr_corpus = read_lett(os.path.join(self.train_dir_path, domain + '.lett.gz'), 'en', 'fr')
+            self.current_evaluate_en_corpus = en_corpus
+            self.current_evaluate_fr_corpus = fr_corpus
+        else:
+            en_corpus = self.current_evaluate_en_corpus
+            fr_corpus = self.current_evaluate_fr_corpus
         
         num = len(fr_corpus.keys())
         X = np.zeros(shape=(num, self._vector_size))
