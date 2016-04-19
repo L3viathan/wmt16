@@ -11,8 +11,7 @@ tran_en = os.path.join(data_path, 'translations.train/url2text.en')
 
 translation_urls = []
 
-def get_traslated_urls():
-    global tranlsated_urls
+def get_translated_urls():
     print('Get translated urls....')
     with open(tran_en, 'rt') as f:
         url = ''
@@ -34,10 +33,7 @@ def miss_translation():
             if url not in translation_urls:
                 print(url)
 
-def main():
-    get_traslated_urls()
-    miss_translation()
 
 if __name__ == '__main__':
-    main()
-
+    get_translated_urls()
+    miss_translation()
