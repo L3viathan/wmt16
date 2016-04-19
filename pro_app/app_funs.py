@@ -3,7 +3,7 @@ import gzip
 from collections import namedtuple
 
 Page = namedtuple(
-    "Page", "url, html, text, mime_type, encoding, lang")
+    "Page", "url, html, text, mime_type, encoding, lang, tokens, length")
 
 def get_domain(url):
     return url[7: url.index('/', 7)]
@@ -29,8 +29,9 @@ def read_lett_iter(f, decode=True):
         if decode:
             html = html.decode("utf-8")
             text = text.decode("utf-8")
+        tokens = text.lower().split()
 
-        p = Page(url, html, text, mine, enc, lang)
+        p = Page(url, html, text, mine, enc, lang, tokens, len(tokens))
         yield p
 
 def read_lett(f, source_language, target_language):

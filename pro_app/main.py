@@ -1,3 +1,4 @@
+
 from __future__ import print_function, division
 import os
 import math
@@ -9,10 +10,15 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-data_path = '../ml_app/data'
-train_pairs = os.path.join(data_path, 'train.pairs')
-lett_path = os.path.join(data_path, 'lett.train')
-tran_en = os.path.join(data_path, 'translations.train/url2text.en')
+#data_path = '../ml_app/data'
+#train_pairs = os.path.join(data_path, 'train.pairs')
+#lett_path = os.path.join(data_path, 'lett.train')
+#tran_en = os.path.join(data_path, 'translations.train/url2text.en')
+
+data_path = '/tmp/u/vutrongh/lett.train'
+train_pairs = '../../../train.pairs'#os.path.join(data_path, 'train.pairs')
+lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
+tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -93,7 +99,7 @@ def get_pro_model(text):
     '''Just call the model builder we wish to used.'''
     return get_uni_pro_model(text)
 
-def score_original(fr_url, text):
+def score_original(fr_url, words):
     #NOTE for faster we could use a simple smoothing such as 1/V or a small number 10^-4
     if fr_url not in models:#don have its translation
         #print '!!!!dont have transation:', fr_url
@@ -105,7 +111,7 @@ def score_original(fr_url, text):
     #add_nor = col_vocab_size/float(doc_vocab_size)#a kind of simple smooth
 
     score = 0.0
-    words = get_tokens(text)#Hoa delete it
+    #words = get_tokens(text)#Hoa delete it
     for w in words:
         tc = (col_model[w] + 1.0)/(col_size + col_vocab_size)#term collection score
         td = model[w]/word_len#term translation score
@@ -142,7 +148,9 @@ def find_rank_gold(cans, gold):
         rank = None
 
     return rank
-
+LENGTH_UPPER_BOUND = 1.4
+LENGTH_LOWER_BOUND = 0.6
+#SHARED_WORDS_THRES = 0.015
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
     domain = get_domain(en_url)
@@ -152,7 +160,10 @@ def get_candidates(en_url):
 
     cans, scores = [], []
     for fr_url in fr_corpus:
-        score = score_original(fr_url, en_page.text)
+	lrate = en_page.length/float(fr_corpus[fr_url].length)
+        # filter by length
+        if(lrate < LENGTH_LOWER_BOUND and lrate > LENGTH_UPPER_BOUND):  continue
+        score = score_original(fr_url, en_page.tokens)
         if score is not None:
             cans.append(fr_url)
             scores.append(score)
