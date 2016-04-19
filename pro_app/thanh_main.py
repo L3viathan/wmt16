@@ -146,7 +146,6 @@ def get_candidates(en_url):
 
     cans, scores = [], []
     for fr_url in fr_corpus:
-        #TODO: the biggest part made computation slow, check too many candidates, definitely, Hoa's work
         score = score_original(fr_url, en_page.text)
         if score is not None:
             cans.append(fr_url)
