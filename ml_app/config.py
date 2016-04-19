@@ -75,9 +75,12 @@ config = {
     'data_provider':{
          'FullDataProvider':{
             'feature_builder': BigramCounter, 
-            'train_file': as_project_path('data/train_enriched10.txt'),
-            'valid_file': as_project_path('data/valid_enriched10.txt'),
-            'test_file': as_project_path('data/test_enriched10.txt'),
+            #'train_file': as_project_path('data/train_enriched10.txt'),
+            #'valid_file': as_project_path('data/valid_enriched10.txt'),
+            #'test_file': as_project_path('data/test_enriched10.txt'),
+            'train_file': as_project_path('data/top10_pairs/train_top10.txt'),
+            'valid_file': as_project_path('data/top10_pairs/valid_top10.txt'),
+            'test_file': as_project_path('data/top10_pairs/test_top10.txt'),
          },
     },
     'classifier':{
@@ -90,7 +93,7 @@ config = {
         'step_to_report_loss': 50,
         'step_to_save_eval_model': 100,#100, #200,
         'model_storage_file': as_project_path('data/thanh/models/nn'),
-        'load_model_step': 699,
+        'load_model_step': 799,
     },
     'logger':{
     },

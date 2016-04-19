@@ -1,5 +1,6 @@
 data
 tests
+backup
 __pycache__
 *.pyc
 *.pyo
