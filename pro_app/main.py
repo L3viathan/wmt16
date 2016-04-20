@@ -31,7 +31,7 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5 #TODO: smooth parameter find the optimal, is it important for thi app?
-debug = True
+debug = False
 
 
 @contextmanager
@@ -51,6 +51,7 @@ def load_translation(domain):
         for line in f:
             url, line = line.strip().split('\t')
             url, line = url.strip(), line.strip().lower()
+            if url == 'unknown_url': continue
             line_domain = get_domain(url)
             if line_domain == domain:#a domain have transaltion in multiple line
                 tran_corpus[url].append(line)
@@ -223,14 +224,14 @@ def count_evaluate(en_url, cans, scores, gold):
 
 def print_domain_summary(domain):
     global count, top1, top5, top10, dcount, dtop1, dtop5, dtop10, dtime, dtop2
-    mess = '---domain: %s in %.2fs: total: %d, top1: %.2f, top2:%.2f, top5: %.2f, top10: %.2f\n'%(domain, time.time() - dtime, dcount, dtop1/dcount, dtop2/dcount, dtop5/dcount, dtop10/dcount)
+    mess = '---domain: %s in %.2fs: total: %d, top1: %.3f, top2:%.3f, top5: %.3f, top10: %.3f\n'%(domain, time.time() - dtime, dcount, dtop1/dcount, dtop2/dcount, dtop5/dcount, dtop10/dcount)
     print(mess)
     sys.stderr.write(mess)
     dcount, dtop1, dtop2, dtop5, dtop10 = 0.0, 0, 0, 0, 0
     dtime = time.time()
 
 def print_summary():
-    mess = '-Summary: total: %d, top1: %.2f, top2: %.2f, top5: %.2f, top10: %.2f\n'%(count, top1/count, top2/count, top5/count, top10/count)
+    mess = '-Summary: total: %d, top1: %.3f, top2: %.3f, top5: %.3f, top10: %.3f\n'%(count, top1/count, top2/count, top5/count, top10/count)
     print(mess)
     sys.stderr.write(mess)
 
