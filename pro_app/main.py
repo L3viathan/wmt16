@@ -178,8 +178,8 @@ def get_candidates(en_url):
 
 
 ######Only for printing the results not nassary to read
-count, top1, top5, top10 = 0.0, 0, 0, 0
-dcount, dtop1, dtop5, dtop10 = 0.0, 0, 0, 0
+count, top1, top5, top10, top2 = 0.0, 0, 0, 0, 0
+dcount, dtop1, dtop5, dtop10, dtop2 = 0.0, 0, 0, 0, 0
 dtime = time.time()
 
 def print_debug(en_url, cans, scores, gold, rank):
@@ -189,7 +189,7 @@ def print_debug(en_url, cans, scores, gold, rank):
         print('%.3f:\t%s'%(scores[idx], cans[idx]))
 
 def count_evaluate(en_url, cans, scores, gold):
-    global count, top1, top5, top10, dcount, dtop1, dtop5, dtop10
+    global count, top1, top5, top10, dcount, dtop1, dtop5, dtop10, top2, dtop2
     count += 1
     dcount += 1
 
@@ -206,6 +206,10 @@ def count_evaluate(en_url, cans, scores, gold):
         top1 +=1
         dtop1 +=1
         if mark is None: mark = 1
+    if rank<2:
+        top2 += 1
+        dtop2 += 1
+        if mark is None: mark = 2
     if rank<5:
         top5 +=1
         dtop5 +=1
@@ -218,15 +222,15 @@ def count_evaluate(en_url, cans, scores, gold):
     print('-note for debug: Gold in top', mark)
 
 def print_domain_summary(domain):
-    global count, top1, top5, top10, dcount, dtop1, dtop5, dtop10, dtime
-    mess = '---domain: %s in %.2fs: total: %d, top1: %.3f, top5: %.3f, top10: %.3f\n'%(domain, time.time() - dtime, dcount, dtop1/dcount, dtop5/dcount, dtop10/dcount)
+    global count, top1, top5, top10, dcount, dtop1, dtop5, dtop10, dtime, dtop2
+    mess = '---domain: %s in %.2fs: total: %d, top1: %.2f, top2:%.2f, top5: %.2f, top10: %.2f\n'%(domain, time.time() - dtime, dcount, dtop1/dcount, dtop2/dcount, dtop5/dcount, dtop10/dcount)
     print(mess)
     sys.stderr.write(mess)
-    dcount, dtop1, dtop5, dtop10 = 0.0, 0, 0, 0
+    dcount, dtop1, dtop2, dtop5, dtop10 = 0.0, 0, 0, 0, 0
     dtime = time.time()
 
 def print_summary():
-    mess = '-Summary: total: %d, top1: %.3f, top5: %.3f, top10: %.3f\n'%(count, top1/count, top5/count, top10/count)
+    mess = '-Summary: total: %d, top1: %.2f, top2: %.2f, top5: %.2f, top10: %.2f\n'%(count, top1/count, top2/count, top5/count, top10/count)
     print(mess)
     sys.stderr.write(mess)
 
