@@ -10,15 +10,17 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-#data_path = '../ml_app/data'
-#train_pairs = os.path.join(data_path, 'train.pairs')
-#lett_path = os.path.join(data_path, 'lett.train')
-#tran_en = os.path.join(data_path, 'translations.train/url2text.en')
+data_path = '../ml_app/data'
+train_pairs = os.path.join(data_path, 'train.pairs')
+lett_path = os.path.join(data_path, 'lett.train')
+tran_en = os.path.join(data_path, 'translations.train/url2text.en')
 
+'''
 data_path = '/tmp/u/vutrongh/lett.train'
 train_pairs = '../../../train.pairs'#os.path.join(data_path, 'train.pairs')
 lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
+'''
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -44,6 +46,7 @@ def load_translation(domain):
     '''Load transation for the given domain, ignore all line of others domain.'''
     global tran_corpus
     tran_corpus = defaultdict(list)
+    domain_found = False
     with open(tran_en, 'rt') as f:
         for line in f:
             url, line = line.strip().split('\t')
@@ -75,7 +78,7 @@ def load_domain_corpus(domain):
             print_domain_summary(current_domain)
         current_domain = domain
         f = os.path.join(lett_path, domain + '.lett.gz')
-        with time_it('=========Loading domain', '---Loading completed in %.2f ms'):
+        with time_it('=========Loading domain', '---Loading completed in %.2f s'):
             en_corpus, fr_corpus = read_lett(f, 'en', 'fr')
             load_translation(domain)
             compute_models()
@@ -148,9 +151,11 @@ def find_rank_gold(cans, gold):
         rank = None
 
     return rank
-LENGTH_UPPER_BOUND = 1.4
-LENGTH_LOWER_BOUND = 0.6
+
+LENGTH_UPPER_BOUND = 2.0
+LENGTH_LOWER_BOUND = 0.0
 #SHARED_WORDS_THRES = 0.015
+
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
     domain = get_domain(en_url)
@@ -160,9 +165,9 @@ def get_candidates(en_url):
 
     cans, scores = [], []
     for fr_url in fr_corpus:
-	lrate = en_page.length/float(fr_corpus[fr_url].length)
-        # filter by length
-        if(lrate < LENGTH_LOWER_BOUND and lrate > LENGTH_UPPER_BOUND):  continue
+        lrate = en_page.length/float(fr_corpus[fr_url].length)
+        if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
+            continue
         score = score_original(fr_url, en_page.tokens)
         if score is not None:
             cans.append(fr_url)
