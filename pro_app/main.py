@@ -30,8 +30,8 @@ models = None#dict, store all unigram language model of translation for the doma
 col_model = None#unigram language model for all translation of the current domain (the collection)
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
-lamda = 0.5 #TODO: smooth parameter find the optimal, is it important for thi app?
-debug = False
+lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
+debug = True
 
 
 @contextmanager
@@ -153,8 +153,8 @@ def find_rank_gold(cans, gold):
 
     return rank
 
-LENGTH_UPPER_BOUND = 2.0
-LENGTH_LOWER_BOUND = 0.0
+#LENGTH_UPPER_BOUND = 2.0
+#LENGTH_LOWER_BOUND = 0.0
 #SHARED_WORDS_THRES = 0.015
 
 def get_candidates(en_url):
@@ -166,9 +166,9 @@ def get_candidates(en_url):
 
     cans, scores = [], []
     for fr_url in fr_corpus:
-        lrate = en_page.length/float(fr_corpus[fr_url].length)
-        if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
-            continue
+        #lrate = en_page.length/float(fr_corpus[fr_url].length)
+        #if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
+            #continue
         score = score_original(fr_url, en_page.tokens)
         if score is not None:
             cans.append(fr_url)
@@ -236,12 +236,13 @@ def print_summary():
     sys.stderr.write(mess)
 
 def run1():
+    debug_domains = ['www.dakar.com', 'www.luontoportti.com', 'www.nauticnews.com', 'www.the-great-adventure.fr']
     with open(train_pairs, 'rt') as f:
         for line in f:
             en_url, gold = line.strip().split('\t')
             en_url, gold = en_url.strip(), gold.strip()
 
-            if debug and get_domain(en_url)!= 'bugadacargnel.com':
+            if debug and get_domain(en_url) not in debug_domains:
                 continue
 
             cans, scores = get_candidates(en_url)
