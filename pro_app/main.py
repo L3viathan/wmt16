@@ -22,6 +22,13 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
+test_outputs = './test_outputs'
+test_debugs = './test_debugs'
+test_data_path = '../ml_app/data/test'
+test_lett_path = os.path.join(data_path, 'lett.test')
+test_tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
+
+
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
 fr_corpus = None#dict, Frech page of the current domain
@@ -33,6 +40,8 @@ col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
 debug = True
 
+def print_err(msg):
+    sys.stderr.write(msg + '\n')
 
 @contextmanager
 def time_it(msg_in, msg_out):
@@ -250,6 +259,18 @@ def run1():
 
     print_domain_summary(current_domain)
     print_summary()
+
+def predict_one_domain(domain):
+    debug_file = domain + '.debug.txt'
+    output_file = domain + '.output.txt'
+    
+
+def run2():
+    '''Only print out top 5 each domain for output, top10 for debugs in a separated file, so later if we need fix a domain without transation or something we don't need to rerun every thing again.'''
+    pass
+    #Get lett file in test_data, get candiate for every single en_url available
+    #domain results in a file, debut in a file,
+    #list all lett file, call predic one domain
 
 def print_page_content(corpus, url):
     #print content in a reable fomat for corpus[url] 
