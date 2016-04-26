@@ -10,10 +10,12 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
+'''
 data_path = '../ml_app/data'
 train_pairs = os.path.join(data_path, 'train.pairs')
 lett_path = os.path.join(data_path, 'lett.train')
 tran_en = os.path.join(data_path, 'translations.train/url2text.en')
+'''
 
 '''
 data_path = '/tmp/u/vutrongh/lett.train'
@@ -22,12 +24,13 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
+#'''
 test_outputs = './test_outputs'
 test_debugs = './test_debugs'
-test_data_path = '../ml_app/data/test'
-test_lett_path = os.path.join(data_path, 'lett.test')
-test_tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
-
+data_path = '../ml_app/data/test'
+lett_path = os.path.join(data_path, 'lett.test')
+tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
+#'''
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -38,7 +41,7 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
-debug = True
+debug = False
 
 def print_err(msg):
     sys.stderr.write(msg + '\n')
@@ -46,10 +49,12 @@ def print_err(msg):
 @contextmanager
 def time_it(msg_in, msg_out):
     print(msg_in)
+    sys.stderr.write(msg_in + '\n')
     start = time.time()
     yield
     duration = time.time() - start
     print(msg_out % duration)
+    sys.stderr.write(msg_out % duration + '\n')
 
 def load_translation(domain):
     '''Load transation for the given domain, ignore all line of others domain.'''
@@ -84,8 +89,8 @@ def load_domain_corpus(domain):
     '''each domain will be load only one time to memory'''
     global current_domain, en_corpus, fr_corpus
     if current_domain != domain:
-        if current_domain != '':
-            print_domain_summary(current_domain)
+        #if current_domain != '':
+            #print_domain_summary(current_domain)
         current_domain = domain
         f = os.path.join(lett_path, domain + '.lett.gz')
         with time_it('=========Loading domain', '---Loading completed in %.2f s'):
@@ -162,22 +167,22 @@ def find_rank_gold(cans, gold):
 
     return rank
 
-#LENGTH_UPPER_BOUND = 2.0
-#LENGTH_LOWER_BOUND = 0.0
+LENGTH_UPPER_BOUND = 1.5
+LENGTH_LOWER_BOUND = 0.5
 #SHARED_WORDS_THRES = 0.015
 
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
-    domain = get_domain(en_url)
-    load_domain_corpus(domain)
+    #domain = get_domain(en_url)#TODO get these coment back for run train data?? doo all en_url of a domain, so load 
+    #load_domain_corpus(domain)
 
     en_page = en_corpus[en_url]
 
     cans, scores = [], []
     for fr_url in fr_corpus:
-        #lrate = en_page.length/float(fr_corpus[fr_url].length)
-        #if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
-            #continue
+        lrate = en_page.length/float(fr_corpus[fr_url].length)
+        if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
+            continue
         score = score_original(fr_url, en_page.tokens)
         if score is not None:
             cans.append(fr_url)
@@ -260,17 +265,37 @@ def run1():
     print_domain_summary(current_domain)
     print_summary()
 
-def predict_one_domain(domain):
-    debug_file = domain + '.debug.txt'
-    output_file = domain + '.output.txt'
-    
+def print_test_debug(en_url, cans, scores):
+    print('------en_url_source:%s'%en_url)
+    m = min(10, cans.shape[0])
+    if m<=0:
+        return
+    for idx in range(m):
+        print('%.3f\t%s'%(scores[idx], cans[idx]))
 
-def run2():
+def predict_one_domain(domain):
+    #debug_file = domain + '.debug.txt'
+    #output_file = domain + '.output.txt'
+    load_domain_corpus(domain)
+    for en_url in en_corpus:
+        cans, scores = get_candidates(en_url)
+        print_test_debug(en_url, cans, scores)
+
+def run2():#get the result to submit
     '''Only print out top 5 each domain for output, top10 for debugs in a separated file, so later if we need fix a domain without transation or something we don't need to rerun every thing again.'''
-    pass
     #Get lett file in test_data, get candiate for every single en_url available
     #domain results in a file, debut in a file,
     #list all lett file, call predic one domain
+    debug_domain_files = ['bugadacargnel.com']
+    for domain in os.listdir(lett_path):
+        domain = domain[:domain.find('.lett.gz')]
+        if debug and domain  not in debug_domain_files:
+            continue
+        with time_it('================Processing domain:' + domain, '======domain,' + domain + ', completed in %.2f s'):
+           predict_one_domain(domain)
+        #break
+
+        
 
 def print_page_content(corpus, url):
     #print content in a reable fomat for corpus[url] 
@@ -281,4 +306,5 @@ def run_debug():
     #print content and see why it worng
 
 if __name__ == '__main__':
-    run1()
+    #run1()
+    run2()
