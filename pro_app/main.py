@@ -42,6 +42,8 @@ col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
 debug = True
+output_top = 10
+use_filter = False
 
 def print_err(msg):
     sys.stderr.write(msg + '\n')
@@ -147,24 +149,28 @@ def score_original(fr_url, words):
 
     return score
 
-def col_model_for_a_doc(words):
-    doc_col_model_scores = []
-    for idx, w in enumerate(words):
-        doc_col_model_scores.append((col_model[w] + 1.0)/(col_size + col_vocab_size))#term collection score
+def col_model_for_a_doc(words, unique_tokens):
+    doc_col_model_scores = {}
+    #for idx, w in enumerate(words):
+    for w in unique_tokens:
+        doc_col_model_scores[w]= {'count':words.count(w), 'col_score':(col_model[w] + 1.0)/(col_size + col_vocab_size)}#term collection score
     return doc_col_model_scores
 
-def score_original_optimal(fr_url, words, doc_col_scores):
+def score_original_optimal(fr_url, words, doc_col_scores, max_score):
     if fr_url not in models:#don have its translation
         return None
 
     model, word_len = models[fr_url] 
 
     score = 0.0
-    for idx, w in enumerate(words):
+    for w in words: #words is unique tokens
         #tc = (col_model[w] + 1.0)/(col_size + col_vocab_size)#term collection score
-        tc = doc_col_scores[idx]
+        w_col_score = doc_col_scores[w]
         td = model[w]/word_len#term translation score
-        score += math.log(lamda*td + (1-lamda)*tc)#linear interporation, jelinek-mercer smoothing
+        #score += math.log(lamda*td + (1-lamda)*tc)#linear interporation, jelinek-mercer smoothing
+        score += w_col_score['count']*math.log(lamda*td + (1-lamda)*w_col_score['col_score'])#linear interporation, jelinek-mercer smoothing
+        if score<max_score:
+            return None
 
     return score
 
@@ -190,7 +196,7 @@ def find_rank_gold(cans, gold):
 
     return rank
 
-LENGTH_UPPER_BOUND = 1.5
+LENGTH_UPPER_BOUND = 2.0
 LENGTH_LOWER_BOUND = 0.5
 #SHARED_WORDS_THRES = 0.015
 
@@ -200,22 +206,27 @@ def get_candidates(en_url):
     #load_domain_corpus(domain)
 
     en_page = en_corpus[en_url]
-    doc_col_scores = col_model_for_a_doc(en_page.tokens)
+    unique_en_tokens = list(set(en_page.tokens))
+    doc_col_scores = col_model_for_a_doc(en_page.tokens, unique_en_tokens)
 
-    cans, scores = [], []
+    cans, scores = [''], [0]
+    max_score = float('-inf')
+    
     for fr_url in fr_corpus:
         lrate = en_page.length/float(fr_corpus[fr_url].length)
-        if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
-            continue
+        #if use_filter and (lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND):#filter length
+                #continue
         #score = score_original(fr_url, en_page.tokens)
         #print('1:' + str(score))
-        score = score_original_optimal(fr_url, en_page.tokens, doc_col_scores)
+        score = score_original_optimal(fr_url, unique_en_tokens, doc_col_scores, max_score)
         #print('2:' + str(score))
-        #import pdb
-        #pdb.set_trace()
         if score is not None:
-            cans.append(fr_url)
-            scores.append(score)
+            #cans.append(fr_url)
+            #scores.append(score)
+            if score>max_score:
+                max_score = score
+                cans[0] = fr_url
+                scores[0] = score
 
     cans, scores = sort_candidates(cans, scores)
     return cans, scores
@@ -296,11 +307,11 @@ def run1():
 
 def print_test_debug(en_url, cans, scores):
     print('------en_url_source:%s'%en_url)
-    m = min(10, cans.shape[0])
+    m = min(output_top, cans.shape[0])
     if m<=0:
         return
     for idx in range(m):
-        print('%.3f\t%s'%(scores[idx], cans[idx]))
+        print('%d\t%.3f\t%s'%(idx, scores[idx], cans[idx]))
 
 def predict_one_domain(domain):
     #debug_file = domain + '.debug.txt'
@@ -315,7 +326,7 @@ def run2():#get the result to submit
     #Get lett file in test_data, get candiate for every single en_url available
     #domain results in a file, debut in a file,
     #list all lett file, call predic one domain
-    debug_domain_files = ['bugadacargnel.com']
+    debug_domain_files = ['bugadacargnel.com', 'harasdesfrettes.com']
     for domain in os.listdir(lett_path):
         domain = domain[:domain.find('.lett.gz')]
         if debug and domain  not in debug_domain_files:
