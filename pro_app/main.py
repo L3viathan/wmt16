@@ -10,12 +10,12 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-'''
+#'''
 data_path = '../ml_app/data'
 train_pairs = os.path.join(data_path, 'train.pairs')
 lett_path = os.path.join(data_path, 'lett.train')
 tran_en = os.path.join(data_path, 'translations.train/url2text.en')
-'''
+#'''
 
 '''
 data_path = '/tmp/u/vutrongh/lett.train'
@@ -24,13 +24,13 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
-#'''
+'''
 test_outputs = './test_outputs'
 test_debugs = './test_debugs'
 data_path = '../ml_app/data/test'
 lett_path = os.path.join(data_path, 'lett.test')
 tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
-#'''
+'''
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -41,7 +41,7 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
-debug = False
+debug = True
 
 def print_err(msg):
     sys.stderr.write(msg + '\n')
@@ -124,7 +124,7 @@ def score_original(fr_url, words):
         return None
 
     model, word_len = models[fr_url] 
-    doc_vocab_size = len(model.keys())
+    #doc_vocab_size = len(model.keys())
 
     #add_nor = col_vocab_size/float(doc_vocab_size)#a kind of simple smooth
 
@@ -146,6 +146,29 @@ def score_original(fr_url, words):
         '''
 
     return score
+
+def col_model_for_a_doc(words):
+    doc_col_model_scores = []
+    for idx, w in enumerate(words):
+        doc_col_model_scores.append((col_model[w] + 1.0)/(col_size + col_vocab_size))#term collection score
+    return doc_col_model_scores
+
+def score_original_optimal(fr_url, words, doc_col_scores):
+    if fr_url not in models:#don have its translation
+        return None
+
+    model, word_len = models[fr_url] 
+
+    score = 0.0
+    for idx, w in enumerate(words):
+        #tc = (col_model[w] + 1.0)/(col_size + col_vocab_size)#term collection score
+        tc = doc_col_scores[idx]
+        td = model[w]/word_len#term translation score
+        score += math.log(lamda*td + (1-lamda)*tc)#linear interporation, jelinek-mercer smoothing
+
+    return score
+
+
 
 def sort_candidates(cans, scores):
     '''Get two list, cans[0] with a coresponding score at scores[0], then sort them decreaseing by its score.'''
@@ -177,13 +200,19 @@ def get_candidates(en_url):
     #load_domain_corpus(domain)
 
     en_page = en_corpus[en_url]
+    doc_col_scores = col_model_for_a_doc(en_page.tokens)
 
     cans, scores = [], []
     for fr_url in fr_corpus:
         lrate = en_page.length/float(fr_corpus[fr_url].length)
         if lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND:#filter length
             continue
-        score = score_original(fr_url, en_page.tokens)
+        #score = score_original(fr_url, en_page.tokens)
+        #print('1:' + str(score))
+        score = score_original_optimal(fr_url, en_page.tokens, doc_col_scores)
+        #print('2:' + str(score))
+        #import pdb
+        #pdb.set_trace()
         if score is not None:
             cans.append(fr_url)
             scores.append(score)
