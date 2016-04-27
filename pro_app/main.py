@@ -4,18 +4,19 @@ import os
 import math
 import sys
 import time
+import heapq
 import numpy as np
 from collections import defaultdict
 from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-#'''
+'''
 data_path = '../ml_app/data'
 train_pairs = os.path.join(data_path, 'train.pairs')
 lett_path = os.path.join(data_path, 'lett.train')
 tran_en = os.path.join(data_path, 'translations.train/url2text.en')
-#'''
+'''
 
 '''
 data_path = '/tmp/u/vutrongh/lett.train'
@@ -24,13 +25,13 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
-'''
+#'''
 test_outputs = './test_outputs'
 test_debugs = './test_debugs'
 data_path = '../ml_app/data/test'
 lett_path = os.path.join(data_path, 'lett.test')
 tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
-'''
+#'''
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -41,8 +42,8 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
-debug = True
-output_top = 10
+debug = False
+output_top = 20
 use_filter = False
 
 def print_err(msg):
@@ -156,7 +157,7 @@ def col_model_for_a_doc(words, unique_tokens):
         doc_col_model_scores[w]= {'count':words.count(w), 'col_score':(col_model[w] + 1.0)/(col_size + col_vocab_size)}#term collection score
     return doc_col_model_scores
 
-def score_original_optimal(fr_url, words, doc_col_scores, max_score):
+def score_original_optimal(fr_url, words, doc_col_scores):
     if fr_url not in models:#don have its translation
         return None
 
@@ -169,8 +170,8 @@ def score_original_optimal(fr_url, words, doc_col_scores, max_score):
         td = model[w]/word_len#term translation score
         #score += math.log(lamda*td + (1-lamda)*tc)#linear interporation, jelinek-mercer smoothing
         score += w_col_score['count']*math.log(lamda*td + (1-lamda)*w_col_score['col_score'])#linear interporation, jelinek-mercer smoothing
-        if score<max_score:
-            return None
+        #if score<max_score:#only keep the best
+            #return None
 
     return score
 
@@ -209,27 +210,41 @@ def get_candidates(en_url):
     unique_en_tokens = list(set(en_page.tokens))
     doc_col_scores = col_model_for_a_doc(en_page.tokens, unique_en_tokens)
 
-    cans, scores = [''], [0]
-    max_score = float('-inf')
+    cans, scores = [], []
+
+    #cans, scores = [''], [0]
+    #max_score = float('-inf')
+
+    #pq_result = []
     
     for fr_url in fr_corpus:
-        lrate = en_page.length/float(fr_corpus[fr_url].length)
+        #lrate = en_page.length/float(fr_corpus[fr_url].length)
         #if use_filter and (lrate < LENGTH_LOWER_BOUND or lrate > LENGTH_UPPER_BOUND):#filter length
                 #continue
         #score = score_original(fr_url, en_page.tokens)
         #print('1:' + str(score))
-        score = score_original_optimal(fr_url, unique_en_tokens, doc_col_scores, max_score)
+        #score = score_original_optimal(fr_url, unique_en_tokens, doc_col_scores, max_score)
+        score = score_original_optimal(fr_url, unique_en_tokens, doc_col_scores)
         #print('2:' + str(score))
         if score is not None:
-            #cans.append(fr_url)
-            #scores.append(score)
-            if score>max_score:
-                max_score = score
-                cans[0] = fr_url
-                scores[0] = score
+            cans.append(fr_url)
+            scores.append(score)
 
+            #if score>max_score:
+                #max_score = score
+                #cans[0] = fr_url
+                #scores[0] = score
+
+            #if len(pq_result)<output_top:
+                #heapq.heappush(pq_result, (score, fr_url))
+            #else:
+                #heapq.heappushpop(pq_result, (score, fr_url))
+                
     cans, scores = sort_candidates(cans, scores)
+    #cans, scores = np.array(cans), np.array(scores)
     return cans, scores
+
+    #return pq_result
 
 
 ######Only for printing the results not nassary to read
@@ -313,6 +328,12 @@ def print_test_debug(en_url, cans, scores):
     for idx in range(m):
         print('%d\t%.3f\t%s'%(idx, scores[idx], cans[idx]))
 
+def print_test_debug2(en_url, pq_result):
+    print('------en_url_source:%s'%en_url)
+    for idx, can in enumerate(heapq.nlargest(output_top, pq_result)):
+        score, can = can
+        print('%d\t%.3f\t%s'%(idx, score, can))
+
 def predict_one_domain(domain):
     #debug_file = domain + '.debug.txt'
     #output_file = domain + '.output.txt'
@@ -320,6 +341,8 @@ def predict_one_domain(domain):
     for en_url in en_corpus:
         cans, scores = get_candidates(en_url)
         print_test_debug(en_url, cans, scores)
+        #pq_result = get_candidates(en_url)
+        #print_test_debug2(en_url, pq_result)
 
 def run2():#get the result to submit
     '''Only print out top 5 each domain for output, top10 for debugs in a separated file, so later if we need fix a domain without transation or something we don't need to rerun every thing again.'''
