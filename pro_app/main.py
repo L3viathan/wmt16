@@ -5,6 +5,7 @@ import math
 import sys
 import time
 import heapq
+import argparse
 import numpy as np
 from collections import defaultdict
 from contextlib import contextmanager
@@ -344,13 +345,24 @@ def predict_one_domain(domain):
         #pq_result = get_candidates(en_url)
         #print_test_debug2(en_url, pq_result)
 
-def run2():#get the result to submit
+def read_domains(begin=None, end=None):
+    domains = []
+    with open('domains.txt', 'r') as f:
+        for idx, line in enumerate(f.readlines()):
+            line = line.strip()
+            if begin is None or (idx>=begin and idx<end):
+                print('%d: %s'%(idx, line))
+                domains.append(line)
+    return domains
+
+def run2(domains):#get the result to submit
     '''Only print out top 5 each domain for output, top10 for debugs in a separated file, so later if we need fix a domain without transation or something we don't need to rerun every thing again.'''
     #Get lett file in test_data, get candiate for every single en_url available
     #domain results in a file, debut in a file,
     #list all lett file, call predic one domain
     debug_domain_files = ['bugadacargnel.com', 'harasdesfrettes.com']
-    for domain in os.listdir(lett_path):
+    #for domain in os.listdir(lett_path):
+    for domain in domains:
         domain = domain[:domain.find('.lett.gz')]
         if debug and domain  not in debug_domain_files:
             continue
@@ -370,4 +382,11 @@ def run_debug():
 
 if __name__ == '__main__':
     #run1()
-    run2()
+    parser = argparse.ArgumentParser(description='Runing first exercise of NPFL103')
+    parser.add_argument('-b', metavar='begin_at_line', dest='begin', help='Begin process at line', type=int, default=None)
+    parser.add_argument('-e', metavar='end_at_line', dest='end', help='End process at line', type=int, default=None)
+
+    args = parser.parse_args()
+    domains = read_domains(args.begin, args.end)
+
+    run2(domains)
