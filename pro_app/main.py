@@ -345,6 +345,20 @@ def predict_one_domain(domain):
         #pq_result = get_candidates(en_url)
         #print_test_debug2(en_url, pq_result)
 
+def read_processed_urls():
+    path = './'
+    fname_start = 'test.result'
+    urls = []
+    for f in os.listdir(path):
+        if f.startswith(fname_start):
+            with open(os.path.join(path, f), 'rt') as fresult:
+                for line in fresult:
+                     
+        
+        
+
+#with open(
+
 def read_domains(begin=None, end=None):
     domains = []
     with open('domains.txt', 'r') as f:
@@ -387,6 +401,8 @@ if __name__ == '__main__':
     parser.add_argument('-e', metavar='end_at_line', dest='end', help='End process at line', type=int, default=None)
 
     args = parser.parse_args()
-    domains = read_domains(args.begin, args.end)
 
-    run2(domains)
+    #domains = read_domains(args.begin, args.end)
+    processed_urls = read_processed_urls()
+
+    #run2(domains)
