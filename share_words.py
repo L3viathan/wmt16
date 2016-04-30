@@ -233,7 +233,12 @@ def read_domains(begin=None, end=None):
                 print('%d: %s'%(idx, line))
                 domains.append(line)
     return domains
-
+def custome_cmp (item1, item2):
+    score = item1[1] - item2[1]
+    if(score < 0.0001 and score > - 0.0001):
+        return len(item2[0]) - len(item1[0])
+    if(score > 0) : return 1
+    return -1
 
 if __name__ == '__main__': 
     import operator, argparse
@@ -250,6 +255,7 @@ if __name__ == '__main__':
 
     for fn in domains:
         sources, targets = read_lett_nonltk(CORPUS_PATH + fn, 'en', 'fr')
+        sys.stderr.write("loading done\n")
         for url in sources:
             occur_map1, map1 = None, None
             source = sources[url]
@@ -267,13 +273,11 @@ if __name__ == '__main__':
             if(len(candis) == 0):
                 continue
             # rank all candidates left, take the highest-score one
-            sorted_cans = sorted(candis.items(), key = operator.itemgetter(1), reverse=True)
+            sorted_cans = sorted(candis.items(), cmp=custome_cmp, reverse=True)
 	    count = -1
-	    #while (count < 10 and count < len(sorted_cans) -1):
-             #   is_target = 0
-            #	count = count + 1
-	    #	turl = sorted_cans[count][0]
-             #   if (train[url] == turl) : is_target = 1
-              #  print(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length) + "\t" +str(is_target))
+	    while (count < 10 and count < len(sorted_cans) -1):
+            	count = count + 1
+	    	turl = sorted_cans[count][0]
+                print(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length))
             #count = -1
-            print(url +"\t" + sorted_cans[0][0]  + "\t" + str(sorted_cans[0][1])+ "\t" + str(sorted_cans[0][1]/source.length))
+            #print(url +"\t" + sorted_cans[0][0]  + "\t" + str(sorted_cans[0][1])+ "\t" + str(sorted_cans[0][1]/source.length))
