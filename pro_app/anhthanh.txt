@@ -1,0 +1,39 @@
+==============Loading domain:  bugadacargnel.com
+---Loading completed in  0.593626976013
+---------- http://bugadacargnel.com/en/pages/artistes.php?name=18492&page=portfolio&categ=54
+---gold(rank=0, score=-28138.460):http://bugadacargnel.com/fr/pages/artistes.php?name=18492&page=portfolio&categ=54
+-28138.460:	http://bugadacargnel.com/fr/pages/artistes.php?name=18492&page=portfolio&categ=54
+-29246.666:	http://bugadacargnel.com/fr/pages/expositions.php?name=35
+-29358.119:	http://bugadacargnel.com/fr/pages/expositions.php?name=72&page=communique
+-30461.935:	http://bugadacargnel.com/fr/pages/artistes.php?name=73501&page=presse&presse=20
+-note for debug: Gold in top 1
+---------- http://bugadacargnel.com/en/pages/expositions.php?name=vanessabeecroft
+---gold(rank=0, score=-4366.408):http://bugadacargnel.com/fr/pages/expositions.php?name=vanessabeecroft
+-4366.408:	http://bugadacargnel.com/fr/pages/expositions.php?name=vanessabeecroft
+-4366.408:	http://bugadacargnel.com/fr/pages/expositions.php?name=vanessabeecroft&page=communique
+-4502.516:	http://bugadacargnel.com/fr/pages/expositions.php?name=vanessabeecroft&page=oeuvrespresentees
+-4571.709:	http://bugadacargnel.com/fr/pages/expositions.php?name=laetitiabenat-pierrebismuth
+-4571.709:	http://bugadacargnel.com/fr/pages/expositions.php?name=laetitiabenat-pierrebismuth&page=communique
+-4579.008:	http://bugadacargnel.com/fr/pages/artistes.php?name=73501
+-4594.661:	http://bugadacargnel.com/fr/pages/expositions.php?name=30&page=communique
+-4606.106:	http://bugadacargnel.com/fr/pages/expositions.php?name=61&page=communique
+-4607.071:	http://bugadacargnel.com/fr/pages/expositions.php?name=35
+-4614.251:	http://bugadacargnel.com/fr/pages/expositions.php?name=72&page=communique
+-4777.600:	http://bugadacargnel.com/fr/pages/artistes.php?name=73501&page=presse&presse=20
+-note for debug: Gold in top 1
+!!!Gold is not in cans!!!
+---------- http://bugadacargnel.com/en/pages/artistes.php?name=annikalarsson
+---gold(rank=-1, score=-2801.860):http://bugadacargnel.com/fr/pages/artistes.php?name=annikalarsson
+-2520.566:	http://bugadacargnel.com/fr/pages/expositions.php?name=halukakakce-annikalarsson
+-2520.566:	http://bugadacargnel.com/fr/pages/expositions.php?name=halukakakce-annikalarsson&page=communique
+-2647.091:	http://bugadacargnel.com/fr/pages/artistes.php?name=annikalarsson&page=portfolio&categ=10
+-2685.059:	http://bugadacargnel.com/fr/pages/expositions.php?name=laetitiabenat-pierrebismuth&page=communique
+-2691.543:	http://bugadacargnel.com/fr/pages/expositions.php?name=matcollishaw
+-2695.910:	http://bugadacargnel.com/fr/pages/artistes.php?name=73501
+-2700.102:	http://bugadacargnel.com/fr/pages/expositions.php?name=30&page=communique
+-2703.394:	http://bugadacargnel.com/fr/pages/artistes.php?name=pierrebismuth&page=portfolio&categ=35
+-2704.092:	http://bugadacargnel.com/fr/pages/expositions.php?name=35
+-2711.363:	http://bugadacargnel.com/fr/pages/expositions.php?name=72&page=communique
+-2801.860:	http://bugadacargnel.com/fr/pages/artistes.php?name=73501&page=presse&presse=20
+!!!Gold is not in cans!!!
+---------- http://bugadacargnel.com/en/pages/expositions.php?name=marcoboggiosella-pierogolia-marcellosimeone&page=oeuvrespresentees
