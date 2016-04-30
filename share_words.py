@@ -4,7 +4,7 @@
 
 import os, sys, glob, base64, gzip, re
 from collections import namedtuple, defaultdict
-import fileinput
+import fileinput, threading, Queue
 #from nltk.tokenize import sent_tokenize, word_tokenize
 LENGTH_UPPER_BOUND = 1.7
 LENGTH_LOWER_BOUND = 0.6
@@ -14,7 +14,7 @@ SHARED_POSITION_AWARE_THRES = 0.18
 CORPUS_PATH = "/tmp/u/vutrongh/lett.train/"
 
 Page = namedtuple(
-    "Page", "url, text, lang, length, tokens, constants")
+    "Page", "url, lang, length, tokens")
 
 
 #read a dictionary file
@@ -28,7 +28,7 @@ def init(dict_file):
                 if(len(fr) < 2): continue # I dont like 1-letter words
                 fr_en_dict[fr] = en
             except:
-                print line
+                sys.stderr.write(line+"\n")
 
 
 
@@ -102,7 +102,7 @@ def read_lett_iter_nonltk(f, decode=True):
            #html = html.decode("utf-8")
             text = text.decode("utf-8")
         tokens, constants = get_constants_nonltk(text)
-        p = Page(url, text, lang, len(tokens), tokens, constants)
+        p = Page(url, lang, len(tokens), tokens)
         yield p
 
 
@@ -230,9 +230,10 @@ def read_domains(begin=None, end=None):
         for idx, line in enumerate(f.readlines()):
             line = line.strip()
             if begin is None or (idx>=begin and idx<end):
-                print('%d: %s'%(idx, line))
+                sys.stderr.write('%d: %s\n'%(idx, line))
                 domains.append(line)
     return domains
+
 def custome_cmp (item1, item2):
     score = item1[1] - item2[1]
     if(score < 0.0001 and score > - 0.0001):
@@ -240,8 +241,54 @@ def custome_cmp (item1, item2):
     if(score > 0) : return 1
     return -1
 
+class subThread(threading.Thread):
+    def __init__(self, sources, targets, name):
+        threading.Thread.__init__(self)
+        self.sources = sources
+        self.targets = targets
+        self.queue = Queue.Queue()
+        self.name = name
+        self.running = True
+
+    def put_url(self, url):
+        sys.stderr.write(self.name + " got new url: " + url +"\n")
+        self.queue.put(url, block=True)
+
+def run(urls, sources, targets, sidx, eidx):
+    for url in urls[sidx:eidx]:
+        #if(url not in sources): continue
+        source = sources[url]
+        occur_map1, map1 = None, None
+        candis = {} # possible candidates for 1 url
+        for turl in targets:
+            target = targets[turl]
+            lrate = source.length/float(target.length)
+            # filter by length
+            if(lrate > LENGTH_LOWER_BOUND and lrate < LENGTH_UPPER_BOUND):
+                inter, occur_map1, map1 = doc_inter(source.tokens, target.tokens, occur_map1, map1)
+                sim = doc_similarity_pos_aware(inter, source.length, target.length)
+                # calculating positioned intersections
+                if (sim/source.length > SHARED_POSITION_AWARE_THRES):
+                    candis[turl] = sim
+        if(len(candis) == 0):
+            continue
+        # rank all candidates left, take the highest-score one
+        #sorted_cans = sorted(candis.items(), cmp:custome_cmp, reverse=True)
+        sorted_cans = sorted(candis.items(), cmp=custome_cmp, reverse=True)
+	count = -1
+	while (count < 10 and count < len(sorted_cans) -1):
+            count = count + 1
+            turl = sorted_cans[count][0]
+            sys.stdout.write(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length) + "\n")
+        #sys.stdout.write(url +"\t" + sorted_cans[0][0]+ "\t" + str(sorted_cans[0][1])+ "\t" + str(sorted_cans[0][1]/source.length) + "\n")
+    return
+    #sys.stderr.write(self.name + " finished\n")
+	
+
+
 if __name__ == '__main__': 
-    import operator, argparse
+    import operator, argparse, math
+    from multiprocessing import Process
     # read dictionary file
     init("test_dict.txt")
 
@@ -252,11 +299,25 @@ if __name__ == '__main__':
     args = parser.parse_args()
     domains = read_domains(args.begin, args.end)
  
-
+    num_pro=6
     for fn in domains:
         sources, targets = read_lett_nonltk(CORPUS_PATH + fn, 'en', 'fr')
-        sys.stderr.write("loading done\n")
-        for url in sources:
+        urls = sources.keys()
+	sys.stderr.write("done reading " + fn + "\n")
+	pros = []
+        step = len(urls)/float(num_pro)
+        for i in range(num_pro):
+            sidx = math.floor(i * step)
+            eidx = math.floor((i+1)*step)
+            if(eidx > len(urls) -1): eidx = len(urls) -1
+            sys.stderr.write("from %d to %d\n"%(sidx, eidx))
+            process = Process(target=run, args=(urls,sources, targets, int(sidx), int(eidx)))
+            pros.append(process)
+            process.start()
+        for i in range(num_pro):
+            pros[i].join()
+	
+'''
             occur_map1, map1 = None, None
             source = sources[url]
             candis = {} # possible candidates for 1 url
@@ -273,11 +334,14 @@ if __name__ == '__main__':
             if(len(candis) == 0):
                 continue
             # rank all candidates left, take the highest-score one
-            sorted_cans = sorted(candis.items(), cmp=custome_cmp, reverse=True)
+            sorted_cans = sorted(candis.items(), key = operator.itemgetter(1), reverse=True)
 	    count = -1
-	    while (count < 10 and count < len(sorted_cans) -1):
-            	count = count + 1
-	    	turl = sorted_cans[count][0]
-                print(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length))
+	    #while (count < 10 and count < len(sorted_cans) -1):
+             #   is_target = 0
+            #	count = count + 1
+	    #	turl = sorted_cans[count][0]
+             #   if (train[url] == turl) : is_target = 1
+              #  print(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length) + "\t" +str(is_target))
             #count = -1
-            #print(url +"\t" + sorted_cans[0][0]  + "\t" + str(sorted_cans[0][1])+ "\t" + str(sorted_cans[0][1]/source.length))
+            print(url +"\t" + sorted_cans[0][0]  + "\t" + str(sorted_cans[0][1])+ "\t" + str(sorted_cans[0][1]/source.length))
+'''
