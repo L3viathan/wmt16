@@ -377,7 +377,7 @@ def read_domains(begin=None, end=None, idxs=None):
     with open('domains.txt', 'r') as f:
         for idx, line in enumerate(f.readlines()):
             line = line.strip()
-            if idx in idxs  or (idx>=begin and idx<end):
+            if idx in idxs  or (idx>=begin and idx<end) or (begin==-1 and end==-1 and len(idxs)==0):
                 print('%d: %s'%(idx, line))
                 domains.append(line)
 
