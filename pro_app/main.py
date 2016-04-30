@@ -46,6 +46,7 @@ lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important fo
 debug = False
 output_top = 20
 use_filter = False
+processed_urls = None
 
 def print_err(msg):
     sys.stderr.write(msg + '\n')
@@ -97,7 +98,7 @@ def load_domain_corpus(domain):
             #print_domain_summary(current_domain)
         current_domain = domain
         f = os.path.join(lett_path, domain + '.lett.gz')
-        with time_it('=========Loading domain', '---Loading completed in %.2f s'):
+        with time_it('------Loading domain', '---Loading completed in %.2f s'):
             en_corpus, fr_corpus = read_lett(f, 'en', 'fr')
             load_translation(domain)
             compute_models()
@@ -340,19 +341,46 @@ def predict_one_domain(domain):
     #output_file = domain + '.output.txt'
     load_domain_corpus(domain)
     for en_url in en_corpus:
+        if en_url in processed_urls:
+            continue
         cans, scores = get_candidates(en_url)
         print_test_debug(en_url, cans, scores)
         #pq_result = get_candidates(en_url)
         #print_test_debug2(en_url, pq_result)
 
-def read_domains(begin=None, end=None):
+def read_processed_urls():
+    path = './'
+    fname_start = 'test.result'
+    url_start = '------en_url_source:'
+    urls = set()
+    for f in os.listdir(path):
+        if f.startswith(fname_start):
+            print_err('-*read result file: ' + f)
+            print('-*read result file: ' + f)
+            with open(os.path.join(path, f), 'rt') as fresult:
+                for line in fresult:
+                    if line.startswith(url_start):
+                        line = line.strip()
+                        url = line.split(url_start)[1]
+                        urls.add(url)
+    return urls
+
+def read_domains(begin=None, end=None, idxs=None):
     domains = []
+    if begin is None:
+        begin = -1
+    if end is None:
+        end = -1
+    if idxs is None:
+        idxs = []
+
     with open('domains.txt', 'r') as f:
         for idx, line in enumerate(f.readlines()):
             line = line.strip()
-            if begin is None or (idx>=begin and idx<end):
+            if idx in idxs  or (idx>=begin and idx<end) or (begin==-1 and end==-1 and len(idxs)==0):
                 print('%d: %s'%(idx, line))
                 domains.append(line)
+
     return domains
 
 def run2(domains):#get the result to submit
@@ -370,8 +398,6 @@ def run2(domains):#get the result to submit
            predict_one_domain(domain)
         #break
 
-        
-
 def print_page_content(corpus, url):
     #print content in a reable fomat for corpus[url] 
     pass
@@ -385,8 +411,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Runing first exercise of NPFL103')
     parser.add_argument('-b', metavar='begin_at_line', dest='begin', help='Begin process at line', type=int, default=None)
     parser.add_argument('-e', metavar='end_at_line', dest='end', help='End process at line', type=int, default=None)
+    parser.add_argument('-l', metavar='line_indexs', dest='idxs', nargs='+', help='list of lines for process', type=int, default=None)
 
     args = parser.parse_args()
-    domains = read_domains(args.begin, args.end)
+
+    domains = read_domains(args.begin, args.end, args.idxs)
+    processed_urls = read_processed_urls()
 
     run2(domains)
