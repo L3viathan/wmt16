@@ -254,9 +254,25 @@ class subThread(threading.Thread):
         sys.stderr.write(self.name + " got new url: " + url +"\n")
         self.queue.put(url, block=True)
 
+def get_runned_urls ():
+    path = './'
+    fname_start = 'test.result'
+    urls = set()
+    for f in os.listdir(path):
+        if f.startswith(fname_start):
+            print_err('-*read result file: ' + f)
+            print('-*read result file: ' + f)
+            with open(os.path.join(path, f), 'rt') as fresult:
+                for line in fresult:
+              	    url = line.strip().split("\t")[0]
+                    urls.add(url)
+    return urls
+    
+
 def run(urls, sources, targets, sidx, eidx):
+    runned_urls = get_runned_urls()
     for url in urls[sidx:eidx]:
-        #if(url not in sources): continue
+        if url in runned_urls: continue
         source = sources[url]
         occur_map1, map1 = None, None
         candis = {} # possible candidates for 1 url
