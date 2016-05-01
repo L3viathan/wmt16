@@ -99,7 +99,7 @@ def load_domain_corpus(domain):
             #print_domain_summary(current_domain)
         current_domain = domain
         f = os.path.join(lett_path, domain + '.lett.gz')
-        with time_it('------Loading domain' + domain, '---Loading completed in %.2f s'):
+        with time_it('------Loading domain ' + domain, '---Loading completed in %.2f s'):
             en_corpus, fr_corpus = read_lett(f, 'en', 'fr')
             fr_corpus = None
             load_translation(domain)
@@ -219,7 +219,7 @@ def get_candidates(en_url):
     en_page = en_corpus[en_url]
     unique_en_tokens = list(set(en_page.tokens))
     score = get_chance_score(en_page.tokens, unique_en_tokens)  
-    print('%f\t%d\t%s'%(score, len(en_page.tokens), en_url))
+    print('%f\t%d\t%d\t%d\t%d\t%s'%(score, len(en_page.tokens), len(unique_en_tokens), col_size, col_vocab_size, en_url))#min_socre, #en_len,  #en_vocab_size, col_size, #col_vocab_size
     return
 
     doc_col_scores = col_model_for_a_doc(en_page.tokens, unique_en_tokens)
