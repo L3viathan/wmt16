@@ -212,9 +212,10 @@ def get_chance_score(words, unique_tokens):
         chance_score += words.count(w)*math.log((1-lamda)*(col_model[w] + 1.0)/(col_size + col_vocab_size))#term collection score
     return chance_score
 
+def log(number):
+    return math.log(number) if number!=0 else 0
+
 def get_cross_entropy(en_model, en_sum, fr_model, fr_sum):
-    def log(number):
-        return math.log(number) if number!=0 else 0
     return -sum(en_model[word]/en_sum * log(fr_model[word]/fr_sum) for word in en_model.keys() | fr_model.keys())
 
 def get_cosine(en_model, en_len, fr_model, fr_len):
@@ -227,7 +228,7 @@ def get_cosine(en_model, en_len, fr_model, fr_len):
     return np.dot(en_vec, fr_vec) / np.sqrt(np.dot(en_vec, en_vec) * np.dot(fr_vec, fr_vec))
 
 def get_kl_divergence(en_model, en_len, fr_model, fr_len):
-    hoa
+    return sum(en_model[word]/en_sum * log((en_model[word]/en_sum) / (fr_model[word]/fr_sum)) for word in en_model.keys() | fr_model.keys())
 
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
