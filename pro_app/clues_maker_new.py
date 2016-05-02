@@ -215,7 +215,7 @@ def get_chance_score(words, unique_tokens):
 def get_cross_entropy(en_model, en_sum, fr_model, fr_sum):
     def log(number):
         return math.log(number) if number!=0 else 0
-    return -sum(en_model[word] * log(fr_model[word]) for word in en_model.keys() | fr_model.keys())
+    return -sum(en_model[word]/en_sum * log(fr_model[word]/fr_sum) for word in en_model.keys() | fr_model.keys())
 
 def get_cosine(en_model, en_len, fr_model, fr_len):
     words = list(en_model.keys() | fr_model.keys())
