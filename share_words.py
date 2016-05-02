@@ -258,6 +258,7 @@ def get_runned_urls ():
     path = './'
     fname_start = 'test.result'
     urls = set()
+    if (len (os.listdir(path)) == 0): sys.stderr.write("got no runned urls\n")
     for f in os.listdir(path):
         if f.startswith(fname_start):
             print_err('-*read result file: ' + f)
