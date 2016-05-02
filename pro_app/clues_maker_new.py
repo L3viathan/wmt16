@@ -216,7 +216,13 @@ def get_cross_entropy(en_model, en_len, fr_model, fr_len):
     thanh
 
 def get_cosine(en_model, en_len, fr_model, fr_len):
-    jonathan
+    words = list(en_model.keys() | fr_model.keys())
+    en_vec = np.zeroes(len(words))
+    fr_vec = np.zeroes(len(words))
+    for index, word in enumerate(words):
+        en_vec[index] = en_model[word]
+        fr_vec[index] = fr_model[word]
+    return np.dot(en_vec, fr_vec) / np.sqrt(np.dot(en_vec, en_vec) * np.dot(fr_vec, fr_vec))
 
 def get_kl_divergence(en_model, en_len, fr_model, fr_len):
     hoa
