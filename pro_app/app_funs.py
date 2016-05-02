@@ -6,6 +6,8 @@ Page = namedtuple(
     "Page", "url, html, text, mime_type, encoding, lang, tokens, length")
 
 def get_domain(url):
+    if url.startswith('https'):
+        return url[8: url.index('/', 8)]
     return url[7: url.index('/', 7)]
 
 def read_gold(filename):

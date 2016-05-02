@@ -12,12 +12,12 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-'''
+#'''
 data_path = '../ml_app/data'
 train_pairs = os.path.join(data_path, 'train.pairs')
 lett_path = os.path.join(data_path, 'lett.train')
 tran_en = os.path.join(data_path, 'translations.train/url2text.en')
-'''
+#'''
 
 '''
 data_path = '/tmp/u/vutrongh/lett.train'
@@ -26,13 +26,13 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
-#'''
+'''
 test_outputs = './test_outputs'
 test_debugs = './test_debugs'
 data_path = '../ml_app/data/test'
 lett_path = os.path.join(data_path, 'lett.test')
 tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
-#'''
+'''
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -43,10 +43,11 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
-debug = False
+debug = True
 output_top = 20
 use_filter = False
 processed_urls = None
+cal_pairs = None#then pair to calculate the dull
 
 def print_err(msg):
     sys.stderr.write(msg + '\n')
@@ -103,7 +104,7 @@ def load_domain_corpus(domain):
             en_corpus, fr_corpus = read_lett(f, 'en', 'fr')
             fr_corpus = None
             load_translation(domain)
-            compute_models()
+            #compute_models()
 
 def get_tokens(text):
     return text.lower().split()
@@ -114,9 +115,9 @@ def get_uni_pro_model(text):
     pro_model = defaultdict(lambda : 0.0)
     words = get_tokens(text)
     for w in words:
-        #pro_model[w] +=1
-        col_model[w] +=1
-        col_size += 1
+        pro_model[w] +=1
+        #col_model[w] +=1
+        #col_size += 1
 
     return pro_model, len(words)
 
@@ -211,11 +212,37 @@ def get_chance_score(words, unique_tokens):
         chance_score += words.count(w)*math.log((1-lamda)*(col_model[w] + 1.0)/(col_size + col_vocab_size))#term collection score
     return chance_score
 
+def get_cross_entropy(en_model, en_len, fr_model, fr_len):
+    thanh
+
+def get_cosine(en_model, en_len, fr_model, fr_len):
+    jonathan
+
+def get_kl_divergence(en_model, en_len, fr_model, fr_len):
+    hoa
+
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
     domain = get_domain(en_url)#TODO get these coment back for run train data?? doo all en_url of a domain, so load 
     load_domain_corpus(domain)
 
+    en_page = en_corpus[en_url]
+    en_text = ' '.join(en_page.tokens)
+    fr_url = cal_pairs[en_url]
+    fr_text = ' '.join(tran_corpus[fr_url])
+
+    en_model, en_len = get_pro_model(' '.join(en_page.tokens))
+    fr_model, fr_len = get_pro_model(' '.join(tran_corpus[cal_pairs[en_url]]))
+
+    kl = get_kl_divergence(en_model, en_len, fr_model, fr_len)
+    cr = get_cross_entropy(en_model, en_len, fr_model, fr_len)
+    print('%s\t%s\t%f\t%f'%(en_url, fr_url, kl, cr)
+
+
+    import pdb
+    pdb.set_trace()
+
+    #clues 1
     en_page = en_corpus[en_url]
     unique_en_tokens = list(set(en_page.tokens))
     score = get_chance_score(en_page.tokens, unique_en_tokens)  
@@ -420,9 +447,35 @@ def run_debug():
     pass
     #print content and see why it worng
 
+def read_output_thanh():   
+    fname = './train_debugs/train.result.txt'
+    en_url = ''
+    can_url = ''
+    found_can = False
+    cal_pairs = {}
+    with open(fname, 'rt') as f:
+        for line in f:
+            line = line.strip()
+            ms = line.split()
+            if len(ms)!=2:
+                continue
+            key, val = ms
+            
+            if key.startswith('----------'):
+                en_url = line.split(' ')[1]
+                found_can = False
+            elif found_can==False and key.find(':')>=0:
+                found_can = True
+                can_url = val
+                #print(en_url + '\t' + can_url)
+                #pdb.set_trace()
+                cal_pairs[en_url] = can_url
+    return cal_pairs
+
 if __name__ == '__main__':
-    #run1() #Run only for page in train set
-    #'''
+    cal_pairs = read_output_thanh()
+    run1() #Run only for page in train set
+    '''
     parser = argparse.ArgumentParser(description='Runing first exercise of NPFL103')
     parser.add_argument('-b', metavar='begin_at_line', dest='begin', help='Begin process at line', type=int, default=None)
     parser.add_argument('-e', metavar='end_at_line', dest='end', help='End process at line', type=int, default=None)
