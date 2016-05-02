@@ -216,6 +216,7 @@ def log(number):
     return math.log(number) if number!=0 else 0
 
 def get_cross_entropy(en_model, en_sum, fr_model, fr_sum):
+    #print('debug:', en_sum, fr_sum, sep='\t')
     return -sum(en_model[word]/en_sum * log(fr_model[word]/fr_sum) for word in set(en_model.keys()) | set(fr_model.keys()))
 
 def get_cosine(en_model, en_len, fr_model, fr_len):
@@ -237,8 +238,14 @@ def get_candidates(en_url):
 
     en_page = en_corpus[en_url]
     en_text = ' '.join(en_page.tokens)
+    if en_url not in cal_pairs:
+        return 
     fr_url = cal_pairs[en_url]
     fr_text = ' '.join(tran_corpus[fr_url])
+    if len(fr_text)==0 or len(en_text)==0:
+        print('%s\t%s\t%f\t%f\t%f'%(en_url, fr_url, 20, 20, 20))
+        return
+    #print('debug len:', len(fr_text), 'en_len', len(en_text), sep='\t')
 
     en_model, en_len = get_pro_model(' '.join(en_page.tokens))
     fr_model, fr_len = get_pro_model(' '.join(tran_corpus[cal_pairs[en_url]]))
@@ -482,10 +489,31 @@ def read_output_thanh():
                 cal_pairs[en_url] = can_url
     return cal_pairs
 
+def read_output_thanh2():   
+    fname = './almost.final.test.output.txt'
+    en_url = ''
+    can_url = ''
+    found_can = False
+    cal_pairs = {}
+    with open(fname, 'rt') as f:
+        for line in f:
+            line = line.strip()
+            
+            if line.startswith('en_source_url'):
+                en_url = line.split('\t')[1]
+                found_can = False
+            elif found_can==False and len(line.split('\t'))==3:
+                found_can = True
+                can_url = line.split('\t')[2]
+                cal_pairs[en_url] = can_url
+                #print(en_url, can_url, sep="\t")
+    return cal_pairs
+
 if __name__ == '__main__':
-    cal_pairs = read_output_thanh()
+    cal_pairs = read_output_thanh2()
+
     #run1() #Run only for page in train set
-    '''
+    #'''
     parser = argparse.ArgumentParser(description='Runing first exercise of NPFL103')
     parser.add_argument('-b', metavar='begin_at_line', dest='begin', help='Begin process at line', type=int, default=None)
     parser.add_argument('-e', metavar='end_at_line', dest='end', help='End process at line', type=int, default=None)
