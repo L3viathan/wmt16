@@ -12,12 +12,12 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-#'''
+'''
 data_path = '../ml_app/data'
 train_pairs = os.path.join(data_path, 'train.pairs')
 lett_path = os.path.join(data_path, 'lett.train')
 tran_en = os.path.join(data_path, 'translations.train/url2text.en')
-#'''
+'''
 
 '''
 data_path = '/tmp/u/vutrongh/lett.train'
@@ -26,13 +26,13 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
-'''
+#'''
 test_outputs = './test_outputs'
 test_debugs = './test_debugs'
 data_path = '../ml_app/data/test'
 lett_path = os.path.join(data_path, 'lett.test')
 tran_en = os.path.join(data_path, 'translations.test/url2text.en.detok')
-'''
+#'''
 
 current_domain = ''
 en_corpus = None#dict, Enlgish page of the current domain access by en_corpus[url]
@@ -43,7 +43,7 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
-debug = True
+debug = False
 output_top = 20
 use_filter = False
 processed_urls = None
@@ -216,19 +216,19 @@ def log(number):
     return math.log(number) if number!=0 else 0
 
 def get_cross_entropy(en_model, en_sum, fr_model, fr_sum):
-    return -sum(en_model[word]/en_sum * log(fr_model[word]/fr_sum) for word in en_model.keys() | fr_model.keys())
+    return -sum(en_model[word]/en_sum * log(fr_model[word]/fr_sum) for word in set(en_model.keys()) | set(fr_model.keys()))
 
 def get_cosine(en_model, en_len, fr_model, fr_len):
-    words = list(en_model.keys() | fr_model.keys())
-    en_vec = np.zeroes(len(words))
-    fr_vec = np.zeroes(len(words))
+    words = list(set(en_model.keys()) | set(fr_model.keys()))
+    en_vec = np.zeros(len(words))
+    fr_vec = np.zeros(len(words))
     for index, word in enumerate(words):
         en_vec[index] = en_model[word]
         fr_vec[index] = fr_model[word]
     return np.dot(en_vec, fr_vec) / np.sqrt(np.dot(en_vec, en_vec) * np.dot(fr_vec, fr_vec))
 
-def get_kl_divergence(en_model, en_len, fr_model, fr_len):
-    return sum(en_model[word]/en_sum * log((en_model[word]/en_sum) / (fr_model[word]/fr_sum)) for word in en_model.keys() | fr_model.keys())
+def get_kl_divergence(en_model, en_sum, fr_model, fr_sum):
+    return sum(en_model[word]/en_sum * log((en_model[word]/en_sum) / (fr_model[word]/fr_sum)) for word in fr_model)
 
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
@@ -245,9 +245,10 @@ def get_candidates(en_url):
 
     kl = get_kl_divergence(en_model, en_len, fr_model, fr_len)
     cr = get_cross_entropy(en_model, en_len, fr_model, fr_len)
-    print('%s\t%s\t%f\t%f'%(en_url, fr_url, kl, cr)
+    cosine = get_cosine(en_model, en_len, fr_model, fr_len)
+    print('%s\t%s\t%f\t%f\t%f'%(en_url, fr_url, kl, cr, cosine))
 
-
+    return
     import pdb
     pdb.set_trace()
 
@@ -483,7 +484,7 @@ def read_output_thanh():
 
 if __name__ == '__main__':
     cal_pairs = read_output_thanh()
-    run1() #Run only for page in train set
+    #run1() #Run only for page in train set
     '''
     parser = argparse.ArgumentParser(description='Runing first exercise of NPFL103')
     parser.add_argument('-b', metavar='begin_at_line', dest='begin', help='Begin process at line', type=int, default=None)
