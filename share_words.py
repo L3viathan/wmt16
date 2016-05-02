@@ -269,7 +269,7 @@ def get_runned_urls ():
     return urls
     
 
-def run(urls, sources, targets, sidx, eidx):
+def run(urls, sources, targets, sidx, eidx, lock):
     runned_urls = get_runned_urls()
     for url in urls[sidx:eidx]:
         if url in runned_urls: continue
@@ -295,7 +295,11 @@ def run(urls, sources, targets, sidx, eidx):
 	while (count < 10 and count < len(sorted_cans) -1):
             count = count + 1
             turl = sorted_cans[count][0]
-            sys.stdout.write(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length) + "\n")
+            lock.accquire()
+            try:
+                sys.stdout.write(url +"\t" + turl + "\t" + str(sorted_cans[count][1]) + "\t" + str(sorted_cans[count][1]/source.length) + "\n")
+            finally:
+                lock.release()
         #sys.stdout.write(url +"\t" + sorted_cans[0][0]+ "\t" + str(sorted_cans[0][1])+ "\t" + str(sorted_cans[0][1]/source.length) + "\n")
     return
     #sys.stderr.write(self.name + " finished\n")
@@ -304,7 +308,7 @@ def run(urls, sources, targets, sidx, eidx):
 
 if __name__ == '__main__': 
     import operator, argparse, math
-    from multiprocessing import Process
+    from multiprocessing import Process, Lock
     # read dictionary file
     init("test_dict.txt")
 
@@ -317,6 +321,7 @@ if __name__ == '__main__':
  
     num_pro=6
     for fn in domains:
+        lock = Lock()
         sources, targets = read_lett_nonltk(CORPUS_PATH + fn, 'en', 'fr')
         urls = sources.keys()
 	sys.stderr.write("done reading " + fn + "\n")
@@ -327,7 +332,7 @@ if __name__ == '__main__':
             eidx = math.floor((i+1)*step)
             if(eidx > len(urls) -1): eidx = len(urls) -1
             sys.stderr.write("from %d to %d\n"%(sidx, eidx))
-            process = Process(target=run, args=(urls,sources, targets, int(sidx), int(eidx)))
+            process = Process(target=run, args=(urls,sources, targets, int(sidx), int(eidx), lock))
             pros.append(process)
             process.start()
         for i in range(num_pro):
