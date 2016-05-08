@@ -12,12 +12,12 @@ from contextlib import contextmanager
 
 from app_funs import read_lett, get_domain
 
-'''
+#'''
 data_path = '../ml_app/data'
 train_pairs = os.path.join(data_path, 'train.pairs')
 lett_path = os.path.join(data_path, 'lett.train')
 tran_en = os.path.join(data_path, 'translations.train/url2text.en')
-'''
+#'''
 
 '''
 data_path = '/tmp/u/vutrongh/lett.train'
@@ -26,7 +26,7 @@ lett_path = '/tmp/u/vutrongh/lett.train'# os.path.join(data_path, 'lett.train')
 tran_en = '/tmp/u/vutrongh/translations.train/url2text.en'#os.path.join(data_path, 'tiranslations.train/url2text.en')
 '''
 
-#'''
+'''
 test_outputs = './test_outputs'
 test_debugs = './test_debugs'
 data_path = '../ml_app/data/test'
@@ -43,7 +43,7 @@ col_model = None#unigram language model for all translation of the current domai
 col_size = None#number of word in the current collection
 col_vocab_size = None#vocabulary size of the current collection
 lamda = 0.5#0.5 Best#TODO: smooth parameter find the optimal, is it important for thi app?
-debug = False
+debug = True
 output_top = 20
 use_filter = False
 processed_urls = None
@@ -161,6 +161,8 @@ def col_model_for_a_doc(words, unique_tokens):
 
 def score_original_optimal(fr_url, words, doc_col_scores):
     if fr_url not in models:#don have its translation
+        import pdb
+        pdb.set_trace()
         return None
 
     model, word_len = models[fr_url] 
@@ -205,8 +207,8 @@ LENGTH_LOWER_BOUND = 0.5
 
 def get_candidates(en_url):
     '''Get all candidates for the given source English URL'''
-    #domain = get_domain(en_url)#TODO get these coment back for run train data?? doo all en_url of a domain, so load 
-    #load_domain_corpus(domain)
+    domain = get_domain(en_url)#TODO get these coment back for run train data?? doo all en_url of a domain, so load 
+    load_domain_corpus(domain)
 
     en_page = en_corpus[en_url]
     unique_en_tokens = list(set(en_page.tokens))
@@ -307,7 +309,8 @@ def print_summary():
     sys.stderr.write(mess)
 
 def run1():
-    debug_domains = ['www.dakar.com', 'www.luontoportti.com', 'www.nauticnews.com', 'www.the-great-adventure.fr']
+    #debug_domains = ['www.dakar.com', 'www.luontoportti.com', 'www.nauticnews.com', 'www.the-great-adventure.fr']
+    debug_domains = ['eu.blizzard.com']
     with open(train_pairs, 'rt') as f:
         for line in f:
             en_url, gold = line.strip().split('\t')
@@ -407,7 +410,7 @@ def run_debug():
     #print content and see why it worng
 
 if __name__ == '__main__':
-    #run1()
+    run1()
     parser = argparse.ArgumentParser(description='Runing first exercise of NPFL103')
     parser.add_argument('-b', metavar='begin_at_line', dest='begin', help='Begin process at line', type=int, default=None)
     parser.add_argument('-e', metavar='end_at_line', dest='end', help='End process at line', type=int, default=None)
